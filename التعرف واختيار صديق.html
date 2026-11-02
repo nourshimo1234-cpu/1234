@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>هيا نتعرف ونصبح أصدقاء</title>
+<style>
+:root{--ink:#2d3b55;--blue:#559bdc;--pink:#ff9db4;--yellow:#ffd66b;--green:#76cba0}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:16px;display:grid;place-items:center;background:linear-gradient(140deg,#fff1df,#e9f5ff 55%,#f3eaff);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(850px,100%);background:#fff;border:3px solid #fff;border-radius:30px;padding:clamp(18px,4vw,32px);box-shadow:0 14px 38px #304b6820;text-align:center;position:relative;overflow:hidden}
+main:before,main:after{content:"";position:absolute;width:110px;height:110px;border-radius:50%;opacity:.18;z-index:0}
+main:before{background:#ffca62;top:-45px;right:-35px}main:after{background:#76cba0;bottom:-50px;left:-30px}
+.content{position:relative;z-index:1}
+h1{font-size:clamp(26px,4.5vw,38px);margin:4px 0 8px;color:#315b88}
+.lead{font-size:clamp(17px,2.8vw,21px);line-height:1.8;margin:8px auto 18px;max-width:680px}
+.step{display:none;animation:appear .35s ease}.step.active{display:block}
+@keyframes appear{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.mascots,.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0}
+.pick{border:3px solid #e4edf6;background:#f8fbff;border-radius:22px;min-width:112px;padding:12px 14px;cursor:pointer;color:var(--ink);font:inherit;box-shadow:0 4px 0 #dce8f3;transition:.15s}
+.pick .emoji{display:block;font-size:clamp(45px,8vw,65px);margin-bottom:5px}
+.pick .word{font-weight:bold;font-size:17px}
+.pick.selected{border-color:#559bdc;background:#eaf5ff;transform:translateY(-3px);box-shadow:0 6px 0 #b9d8f2}
+input{width:min(420px,100%);padding:15px;border:2px solid #c8def2;border-radius:16px;text-align:center;font:inherit;font-size:20px}
+button:focus-visible,input:focus-visible{outline:4px solid #ffc94d;outline-offset:3px}
+.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:22px 0 5px}
+.action{border:0;border-radius:17px;background:var(--blue);color:white;padding:14px 24px;min-height:54px;font:inherit;font-size:18px;font-weight:bold;cursor:pointer;box-shadow:0 4px 0 #3675b8}
+.action.secondary{background:#eef4fa;color:#38516b;box-shadow:0 4px 0 #d4e0eb}
+.action:disabled{opacity:.45;cursor:not-allowed}
+.feedback{min-height:54px;margin:14px 0 0;color:#25845b;font-size:clamp(19px,3vw,23px);font-weight:bold;line-height:1.6}
+.progress{display:flex;justify-content:center;gap:8px;margin:16px 0}
+.dot{width:12px;height:12px;border-radius:50%;background:#d9e5ef}.dot.on{background:#559bdc}
+.summary{background:#fff8e8;border:2px dashed #f0ce7a;border-radius:22px;padding:18px;margin:15px auto;max-width:560px}
+.summary .big{font-size:65px}
+.summary p{font-size:19px;line-height:1.8}
+.small{font-size:14px;color:#718096;line-height:1.7}
+@media(max-width:480px){.pick{min-width:42%;flex:1}.actions .action{flex:1}}
+</style>
+</head>
+<body>
+<main><div class="content">
+<h1>🤝 هيا نتعرف ونصبح أصدقاء!</h1>
+<p class="lead" id="intro">أنا صديقك الجديد! هيا نلعب ونتعرف على بعضنا. لا توجد إجابة خطأ، اختر ما تحبه أنت 💛</p>
+<div class="progress" aria-label="خطوات النشاط"><span class="dot on"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span></div>
+
+<section class="step active" id="step1">
+ <h2>أولاً: اختر صديقاً يرافقك 🐻</h2>
+ <p class="lead">من تحب أن يكون صديقك في رحلتنا؟</p>
+ <div class="mascots">
+  <button class="pick" data-group="friend" data-value="القطة" data-emoji="🐱"><span class="emoji">🐱</span><span class="word">القطة لولو</span></button>
+  <button class="pick" data-group="friend" data-value="الأرنب" data-emoji="🐰"><span class="emoji">🐰</span><span class="word">الأرنب فوفو</span></button>
+  <button class="pick" data-group="friend" data-value="الدب" data-emoji="🐻"><span class="emoji">🐻</span><span class="word">الدب بودي</span></button>
+ </div>
+ <div class="feedback" id="fb1" aria-live="polite"></div>
+</section>
+
+<section class="step" id="step2">
+ <h2>ثانياً: ما اسمك الجميل؟ 🌟</h2>
+ <p class="lead">نريد أن نناديك باسمك. يمكنك كتابة اسمك أو قوله للمعلمة.</p>
+ <input id="childName" maxlength="18" placeholder="اكتب اسمك هنا (اختياري)" aria-label="اسم الطفل">
+ <div class="actions"><button class="action secondary" id="sayName">سأقول اسمي للمعلمة 🎤</button></div>
+ <p class="small">إذا لم يستطع الطفل الكتابة، تساعده المعلمة أو تترك الاسم فارغاً.</p>
+ <div class="feedback" id="fb2" aria-live="polite"></div>
+</section>
+
+<section class="step" id="step3">
+ <h2>ثالثاً: ماذا تحب أن تفعل؟ 🎈</h2>
+ <p class="lead">كل طفل لديه شيء يحبه. اختر لعبتك أو هوايتك المفضلة.</p>
+ <div class="choices">
+  <button class="pick" data-group="hobby" data-value="الرسم"><span class="emoji">🎨</span><span class="word">الرسم</span></button>
+  <button class="pick" data-group="hobby" data-value="اللعب بالكرة"><span class="emoji">⚽</span><span class="word">الكرة</span></button>
+  <button class="pick" data-group="hobby" data-value="الغناء"><span class="emoji">🎵</span><span class="word">الغناء</span></button>
+  <button class="pick" data-group="hobby" data-value="تركيب المكعبات"><span class="emoji">🧱</span><span class="word">المكعبات</span></button>
+ </div>
+ <div class="feedback" id="fb3" aria-live="polite"></div>
+</section>
+
+<section class="step" id="step4">
+ <h2>رابعاً: كيف تشعر اليوم؟ 😊</h2>
+ <p class="lead">اختر الوجه الذي يشبه شعورك الآن. كل المشاعر مقبولة.</p>
+ <div class="choices">
+  <button class="pick" data-group="mood" data-value="سعيد" data-emoji="😄"><span class="emoji">😄</span><span class="word">سعيد</span></button>
+  <button class="pick" data-group="mood" data-value="هادئ" data-emoji="😌"><span class="emoji">😌</span><span class="word">هادئ</span></button>
+  <button class="pick" data-group="mood" data-value="أشعر بالخجل" data-emoji="😊"><span class="emoji">😊</span><span class="word">خجول قليلاً</span></button>
+ </div>
+ <div class="feedback" id="fb4" aria-live="polite"></div>
+</section>
+
+<section class="step" id="finish">
+ <h2>يا لها من بداية جميلة! 🎉</h2>
+ <div class="summary" id="summary"></div>
+ <p class="lead">أنا سعيدة بالتعرف عليك. هل نلعب معاً مرة أخرى؟</p>
+ <div class="actions"><button class="action" id="restart">نبدأ من جديد 🔄</button></div>
+</section>
+
+<div class="actions" id="navigation">
+ <button class="action secondary" id="back" disabled>رجوع</button>
+ <button class="action" id="next" disabled>التالي ←</button>
+</div>
+<p class="small">للمعلمة: استخدمي الاختيارات لبدء حوار قصير مع الطفل، وامنحيه وقتاً للإجابة دون استعجال.</p>
+</div></main>
+<script>
+const state={friend:null,friendEmoji:"",name:"",hobby:null,mood:null,moodEmoji:""};
+let current=1;
+const steps=[...document.querySelectorAll(".step")];
+const dots=[...document.querySelectorAll(".dot")];
+const next=document.getElementById("next"), back=document.getElementById("back");
+function getArabicVoice(){
+ if(!("speechSynthesis" in window)) return null;
+ const voices=speechSynthesis.getVoices();
+ const ar=voices.filter(v=>/^ar([_-]|$)/i.test(v.lang));
+ return ar.find(v=>/female|woman|zira|sara|sahar|laila|leila|amira|mona|hoda|fatima|noura|reem|salma/i.test(v.name)) || ar.find(v=>/eg/i.test(v.lang)) || ar[0] || null;
+}
+function speak(text){
+ if(!("speechSynthesis" in window)) return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);u.lang="ar-EG";u.rate=.78;u.pitch=1.2;u.volume=1;
+ const v=getArabicVoice();if(v)u.voice=v;speechSynthesis.speak(u);
+}
+function show(n){
+ current=n;steps.forEach((s,i)=>s.classList.toggle("active",i===(n===5?4:n-1)));
+ dots.forEach((d,i)=>d.classList.toggle("on",i<n));
+ document.getElementById("navigation").style.display=n===5?"none":"flex";
+ back.disabled=n===1;next.textContent=n===4?"تعرّفنا! 🎉":"التالي ←";
+ next.disabled=!valid(n);
+}
+function valid(n){return n===1?!!state.friend:n===2?true:n===3?!!state.hobby:n===4?!!state.mood:true;}
+document.querySelectorAll("[data-group]").forEach(btn=>btn.addEventListener("click",()=>{
+ const group=btn.dataset.group;
+ document.querySelectorAll('[data-group="'+group+'"]').forEach(x=>x.classList.remove("selected"));
+ btn.classList.add("selected");
+ if(group==="friend"){state.friend=btn.dataset.value;state.friendEmoji=btn.dataset.emoji;document.getElementById("fb1").textContent="اختيار رائع! "+btn.dataset.value+" أصبح صديقك 💛";speak("اختيار رائع! "+btn.dataset.value+" أصبح صديقك.");}
+ if(group==="hobby"){state.hobby=btn.dataset.value;document.getElementById("fb3").textContent="جميل! أنت تحب "+state.hobby+" ⭐";speak("جميل! أنت تحب "+state.hobby+".");}
+ if(group==="mood"){state.mood=btn.dataset.value;state.moodEmoji=btn.dataset.emoji;document.getElementById("fb4").textContent="شكراً لأنك أخبرتنا عن شعورك. 💚";speak("شكراً لأنك أخبرتنا عن شعورك. نحن سعداء بوجودك.");}
+ next.disabled=!valid(current);
+}));
+document.getElementById("childName").addEventListener("input",e=>{state.name=e.target.value.trim();});
+document.getElementById("sayName").addEventListener("click",()=>speak("يمكنك أن تقول اسمك للمعلمة. أنا أستمع إليك."));
+next.addEventListener("click",()=>{
+ if(!valid(current))return;
+ if(current===2){state.name=document.getElementById("childName").value.trim();}
+ if(current<4){show(current+1);speak(current===1?"ما اسمك الجميل؟":current===2?"ماذا تحب أن تفعل؟":"كيف تشعر اليوم؟");}
+ else{
+  const name=state.name||"صديقي الجديد";
+  document.getElementById("summary").innerHTML='<div class="big">'+state.friendEmoji+' '+state.moodEmoji+'</div><p>مرحباً '+escapeHtml(name)+'!<br>صديقك هو '+escapeHtml(state.friend)+'، وأنت تحب '+escapeHtml(state.hobby)+'.</p><p>سعداء لأنك أصبحت صديقنا! 💛</p>';
+  show(5);speak("أهلاً "+name+". سعداء بالتعرف عليك. أنت صديق رائع. هيا نتعلم ونلعب معاً!");
+ }
+});
+back.addEventListener("click",()=>{if(current>1)show(current-1);});
+document.getElementById("restart").addEventListener("click",()=>location.reload());
+function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+show(1);
+if("speechSynthesis" in window) speechSynthesis.onvoiceschanged=()=>{};
+</script>
+</body>
+</html>
