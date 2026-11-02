@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>لعبة اسمع واختار</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: Tahoma, Arial, sans-serif;
+    background: #fff8e8; color: #263238; text-align: center;
+  }
+  .app { max-width: 850px; margin: 0 auto; padding: 18px 14px 24px; }
+  h1 { margin: 6px 0 8px; color: #5b43a5; font-size: clamp(26px, 5vw, 40px); }
+  .hint { margin: 0 auto 14px; font-size: clamp(17px, 3vw, 22px); }
+  .status { display: flex; justify-content: center; gap: 12px; flex-wrap: wrap; margin: 12px 0 18px; }
+  .pill { background: #fff; border: 2px solid #eadffb; border-radius: 16px; padding: 9px 15px; font-weight: bold; font-size: 18px; }
+  .listen {
+    border: 0; border-radius: 18px; background: #5b43a5; color: white;
+    padding: 14px 24px; font-size: 22px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 4px 0 #3f2c7e; margin: 4px 0 20px;
+  }
+  .listen:active { transform: translateY(2px); box-shadow: 0 2px 0 #3f2c7e; }
+  .choices { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+  .choice {
+    background: white; border: 3px solid #e7e1f0; border-radius: 22px;
+    min-height: 190px; padding: 12px 6px; cursor: pointer; color: inherit;
+    display: flex; flex-direction: column; justify-content: center; align-items: center;
+  }
+  .choice:focus-visible { outline: 4px solid #ffb300; outline-offset: 3px; }
+  .choice.correct { border-color: #35a853; background: #e9f9ed; }
+  .choice.wrong { border-color: #ef5350; background: #fff0ef; }
+  .picture { width: min(100%, 150px); height: 130px; display: block; }
+  .feedback { min-height: 58px; font-size: clamp(22px, 4vw, 30px); font-weight: bold; margin: 16px 0 8px; color: #2e7d32; }
+  .next {
+    border: 0; border-radius: 16px; background: #ffb52e; color: #382400;
+    padding: 13px 24px; font-size: 21px; font-weight: bold; cursor: pointer;
+    display: none; margin: 0 auto;
+  }
+  .next.show { display: inline-block; }
+  .small { font-size: 14px; color: #6b6b6b; margin-top: 18px; }
+  @media (max-width: 540px) {
+    .app { padding: 12px 8px; }
+    .choices { gap: 7px; }
+    .choice { min-height: 150px; border-radius: 16px; padding: 6px 2px; }
+    .picture { height: 100px; }
+    .listen { font-size: 19px; padding: 12px 18px; }
+  }
+</style>
+</head>
+<body>
+<main class="app">
+  <h1>🌟 اسمع واختار! 🌟</h1>
+  <p class="hint">اسمع اسم الصورة، ثم اضغط عليها.</p>
+  <div class="status">
+    <div class="pill" id="round">الجولة 1 من 6</div>
+    <div class="pill" id="score">النجوم: 0 ⭐</div>
+  </div>
+  <button class="listen" id="listenBtn" type="button">🔊 اسمع الاسم</button>
+  <section class="choices" id="choices" aria-label="اختر الصورة الصحيحة"></section>
+  <div class="feedback" id="feedback" aria-live="polite">هل أنت مستعد؟</div>
+  <button class="next" id="nextBtn" type="button">الجولة التالية ←</button>
+  <p class="small">نشاط بسيط بدون قراءة أو حركات ثقيلة.</p>
+</main>
+<script>
+(() => {
+  "use strict";
+  const items = {
+    sun: { name: "الشمس", art: `<svg class="picture" viewBox="0 0 160 140" role="img" aria-label="الشمس"><g stroke="#F6A800" stroke-width="8" stroke-linecap="round"><path d="M80 8v15M80 117v15M18 70h15M127 70h15M36 26l11 11M113 103l11 11M36 114l11-11M113 37l11-11"/></g><circle cx="80" cy="70" r="38" fill="#FFD43B" stroke="#F6A800" stroke-width="4"/><circle cx="66" cy="62" r="4" fill="#5B4530"/><circle cx="94" cy="62" r="4" fill="#5B4530"/><path d="M65 79 Q80 94 95 79" fill="none" stroke="#5B4530" stroke-width="4" stroke-linecap="round"/></svg>` },
+    moon: { name: "القمر", art: `<svg class="picture" viewBox="0 0 160 140" role="img" aria-label="القمر"><circle cx="76" cy="69" r="48" fill="#FFE082"/><circle cx="98" cy="51" r="43" fill="#FFFFFF"/><circle cx="48" cy="37" r="3" fill="#A6A6D8"/><circle cx="57" cy="89" r="4" fill="#A6A6D8"/><path d="M115 23l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#FFC83D"/></svg>` },
+    star: { name: "النجمة", art: `<svg class="picture" viewBox="0 0 160 140" role="img" aria-label="النجمة"><path d="M80 9 L98 51 L144 55 L109 85 L120 128 L80 104 L40 128 L51 85 L16 55 L62 51 Z" fill="#FFD43B" stroke="#F2A900" stroke-width="5" stroke-linejoin="round"/><circle cx="68" cy="66" r="3" fill="#6B4A00"/><circle cx="92" cy="66" r="3" fill="#6B4A00"/><path d="M69 79 Q80 88 91 79" fill="none" stroke="#6B4A00" stroke-width="3" stroke-linecap="round"/></svg>` }
+  };
+  const rounds = ["sun", "moon", "star", "moon", "sun", "star"];
+  const choicesEl = document.getElementById("choices");
+  const feedbackEl = document.getElementById("feedback");
+  const roundEl = document.getElementById("round");
+  const scoreEl = document.getElementById("score");
+  const listenBtn = document.getElementById("listenBtn");
+  const nextBtn = document.getElementById("nextBtn");
+  let roundIndex = 0, score = 0, answered = false, voice = null;
+
+  function speakTarget() {
+    const item = items[rounds[roundIndex]];
+    if (!("speechSynthesis" in window)) {
+      feedbackEl.textContent = "اضغط على الصورة التي أقول اسمها مع المعلمة.";
+      return;
+    }
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(item.name);
+    utterance.lang = "ar-EG";
+    utterance.rate = 0.78;
+    utterance.pitch = 1.05;
+    if (voice) utterance.voice = voice;
+    window.speechSynthesis.speak(utterance);
+  }
+  function loadRound() {
+    answered = false;
+    roundEl.textContent = `الجولة ${roundIndex + 1} من ${rounds.length}`;
+    scoreEl.textContent = `النجوم: ${score} ⭐`;
+    feedbackEl.textContent = "استمع جيدًا 👂";
+    nextBtn.classList.remove("show");
+    choicesEl.innerHTML = "";
+    const target = rounds[roundIndex];
+    const order = ["sun", "moon", "star"];
+    // Change order predictably between rounds without animation or random reflow.
+    if (roundIndex % 3 === 1) order.reverse();
+    if (roundIndex % 3 === 2) { order.splice(0, 3, "moon", "star", "sun"); }
+    order.forEach(key => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "choice";
+      button.setAttribute("aria-label", "صورة");
+      button.innerHTML = items[key].art;
+      button.addEventListener("click", () => choose(button, key, target));
+      choicesEl.appendChild(button);
+    });
+    window.setTimeout(speakTarget, 180);
+  }
+  function choose(button, chosen, target) {
+    if (answered) return;
+    if (chosen === target) {
+      answered = true;
+      score++;
+      scoreEl.textContent = `النجوم: ${score} ⭐`;
+      button.classList.add("correct");
+      feedbackEl.textContent = "أحسنت! ⭐ برافو!";
+      nextBtn.textContent = roundIndex === rounds.length - 1 ? "انتهينا! 🎉" : "الجولة التالية ←";
+      nextBtn.classList.add("show");
+    } else {
+      button.classList.add("wrong");
+      feedbackEl.textContent = "حاول مرة أخرى 💛";
+      window.setTimeout(() => button.classList.remove("wrong"), 450);
+      speakTarget();
+    }
+  }
+  listenBtn.addEventListener("click", speakTarget);
+  nextBtn.addEventListener("click", () => {
+    if (roundIndex < rounds.length - 1) {
+      roundIndex++;
+      loadRound();
+    } else {
+      feedbackEl.textContent = `رائع جدًا! جمعت ${score} من 6 نجوم! 🌟`;
+      nextBtn.textContent = "العب مرة أخرى ↻";
+      nextBtn.onclick = () => {
+        roundIndex = 0; score = 0; nextBtn.onclick = null; loadRound();
+      };
+    }
+  });
+  // Prefer an available Egyptian Arabic voice when the browser provides one.
+  function chooseVoice() {
+    if (!("speechSynthesis" in window)) return;
+    const voices = window.speechSynthesis.getVoices();
+    voice = voices.find(v => /ar-EG/i.test(v.lang)) || voices.find(v => /^ar/i.test(v.lang)) || null;
+  }
+  if ("speechSynthesis" in window) {
+    chooseVoice();
+    window.speechSynthesis.onvoiceschanged = chooseVoice;
+  }
+  loadRound();
+})();
+</script>
+</body>
+</html>

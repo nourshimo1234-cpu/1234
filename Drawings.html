@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مرسمي الجميل</title>
+<style>
+:root{--blue:#4d91d4;--ink:#2c3c55;--pale:#edf6ff}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:14px;display:grid;place-items:center;background:linear-gradient(135deg,#fff2dc,#eaf6ff 55%,#f3eaff);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(920px,100%);background:#fff;border-radius:26px;padding:clamp(14px,3vw,26px);box-shadow:0 12px 34px #304b6820;text-align:center}
+h1{font-size:clamp(25px,4vw,35px);color:#315b88;margin:4px 0}
+p{font-size:clamp(16px,2.5vw,20px);line-height:1.7;margin:8px auto 15px}
+.section-title{font-weight:bold;margin:12px 0 8px}
+.row{display:flex;justify-content:center;align-items:center;gap:9px;flex-wrap:wrap;margin:10px 0}
+button{font:inherit;cursor:pointer;border:0}
+button:focus-visible{outline:4px solid #ffc94d;outline-offset:3px}
+.shape-btn,.tool-btn{background:#edf5fc;color:#31516f;border:2px solid #d5e6f5;border-radius:15px;padding:11px 18px;font-weight:bold;min-height:48px}
+.shape-btn.active,.tool-btn.active{background:#dceeff;border-color:#4d91d4;box-shadow:0 0 0 2px #4d91d433}
+#paintArea{width:min(620px,100%);margin:12px auto;border:3px solid #dceaf6;border-radius:20px;background:#fff;overflow:hidden;touch-action:none}
+canvas{display:block;width:100%;height:auto;aspect-ratio:4/3;touch-action:none;cursor:crosshair}
+.swatch{width:42px;height:42px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px #d7e1ea;min-width:42px}
+.swatch.active{box-shadow:0 0 0 4px #315b88;transform:scale(1.08)}
+.action{background:var(--blue);color:white;border-radius:15px;padding:12px 18px;min-height:48px;font-weight:bold}
+.action.light{background:#edf3f8;color:#36516c}
+#feedback{min-height:34px;color:#25845b;font-weight:bold;font-size:19px;margin:8px}
+.small{font-size:13px;color:#738195}
+@media(max-width:520px){.swatch{width:36px;height:36px;min-width:36px}.shape-btn,.tool-btn,.action{padding:10px 12px;font-size:15px}}
+</style>
+</head>
+<body>
+<main>
+<h1>🖍️ مرسمي الجميل</h1>
+<p>اختر شكلاً، ثم استخدم الألوان وارسم داخله. هيا نبدع معاً!</p>
+
+<div class="section-title">١. اختر الشكل الذي تريد تلوينه</div>
+<div class="row">
+ <button class="shape-btn active" data-shape="circle">⭕ دائرة</button>
+ <button class="shape-btn" data-shape="square">🟦 مربع</button>
+</div>
+
+<div class="section-title">٢. اختر لونك المفضل</div>
+<div class="row" id="palette" aria-label="لوحة الألوان">
+ <button class="swatch active" data-color="#ef4444" style="background:#ef4444" aria-label="أحمر"></button>
+ <button class="swatch" data-color="#ffbf24" style="background:#ffbf24" aria-label="أصفر"></button>
+ <button class="swatch" data-color="#2589e8" style="background:#2589e8" aria-label="أزرق"></button>
+ <button class="swatch" data-color="#35a968" style="background:#35a968" aria-label="أخضر"></button>
+ <button class="swatch" data-color="#a66be0" style="background:#a66be0" aria-label="بنفسجي"></button>
+ <button class="swatch" data-color="#ff83ae" style="background:#ff83ae" aria-label="وردي"></button>
+ <button class="swatch" data-color="#8b5a3c" style="background:#8b5a3c" aria-label="بني"></button>
+ <button class="swatch" data-color="#222222" style="background:#222222" aria-label="أسود"></button>
+</div>
+
+<div class="section-title">٣. ارسم أو لوّن بإصبعك أو بالماوس</div>
+<div id="paintArea"><canvas id="canvas" width="900" height="675" aria-label="مساحة الرسم والتلوين"></canvas></div>
+
+<div class="row">
+ <button class="tool-btn active" id="brush">🖍️ قلم التلوين</button>
+ <button class="tool-btn" id="fill">🪣 لوّن الشكل كله</button>
+ <button class="tool-btn" id="eraser">🧽 ممحاة</button>
+</div>
+<div class="row">
+ <button class="action light" id="undo">↶ تراجع</button>
+ <button class="action light" id="clear">مسح الرسم</button>
+ <button class="action" id="save">⬇️ احفظ رسـمتي</button>
+</div>
+<div id="feedback" aria-live="polite">رائع! اختر لوناً وابدأ الرسم 🌈</div>
+<p class="small">يمكنك تغيير اللون والشكل في أي وقت. لا توجد إجابة خاطئة في مرسمنا!</p>
+</main>
+
+<script>
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const W=900,H=675;
+let shape="circle", color="#ef4444", tool="brush", drawing=false, currentStroke=null;
+let strokes=[], shapeFill=null;
+const shapeButtons=[...document.querySelectorAll(".shape-btn")];
+const swatches=[...document.querySelectorAll(".swatch")];
+const feedback=document.getElementById("feedback");
+
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="ar-EG";u.rate=.82;u.pitch=1.18;u.volume=1;
+ const voices=speechSynthesis.getVoices();
+ const arabic=voices.filter(v=>/^ar([_-]|$)/i.test(v.lang));
+ const female=arabic.find(v=>/female|woman|zira|sara|sahar|laila|leila|amira|mona|hoda|fatima|noura|reem|salma/i.test(v.name));
+ if(female)u.voice=female;else if(arabic.find(v=>/eg/i.test(v.lang)))u.voice=arabic.find(v=>/eg/i.test(v.lang));else if(arabic[0])u.voice=arabic[0];
+ speechSynthesis.speak(u);
+}
+function shapePath(){
+ const p=new Path2D();
+ if(shape==="circle")p.arc(W/2,H/2,220,0,Math.PI*2);
+ else p.rect(W/2-210,H/2-210,420,420);
+ return p;
+}
+function draw(){
+ ctx.clearRect(0,0,W,H);
+ ctx.fillStyle="#fff";ctx.fillRect(0,0,W,H);
+ const path=shapePath();
+ if(shapeFill){ctx.save();ctx.fillStyle=shapeFill;ctx.fill(path);ctx.restore();}
+ ctx.save();ctx.clip(path);
+ for(const stroke of strokes) drawStroke(stroke);
+ if(currentStroke)drawStroke(currentStroke);
+ ctx.restore();
+ ctx.save();ctx.lineWidth=9;ctx.strokeStyle="#354b65";ctx.lineJoin="round";ctx.stroke(path);ctx.restore();
+}
+function drawStroke(stroke){
+ if(!stroke.points.length)return;
+ ctx.save();ctx.strokeStyle=stroke.erase?"#ffffff":stroke.color;ctx.lineWidth=stroke.erase?38:stroke.width;ctx.lineCap="round";ctx.lineJoin="round";
+ ctx.beginPath();ctx.moveTo(stroke.points[0].x*W,stroke.points[0].y*H);
+ for(let i=1;i<stroke.points.length;i++)ctx.lineTo(stroke.points[i].x*W,stroke.points[i].y*H);
+ if(stroke.points.length===1){ctx.lineTo(stroke.points[0].x*W+.1,stroke.points[0].y*H+.1);}
+ ctx.stroke();ctx.restore();
+}
+function point(e){
+ const r=canvas.getBoundingClientRect();
+ return {x:Math.max(0,Math.min(1,(e.clientX-r.left)/r.width)),y:Math.max(0,Math.min(1,(e.clientY-r.top)/r.height))};
+}
+canvas.addEventListener("pointerdown",e=>{
+ drawing=true;canvas.setPointerCapture(e.pointerId);
+ currentStroke={color,erase:tool==="eraser",width:tool==="eraser"?38:30,points:[point(e)]};draw();
+});
+canvas.addEventListener("pointermove",e=>{
+ if(!drawing||!currentStroke)return;
+ currentStroke.points.push(point(e));draw();
+});
+function stopDrawing(){
+ if(!drawing)return;drawing=false;
+ if(currentStroke){strokes.push(currentStroke);currentStroke=null;draw();feedback.textContent="أحسنت! لمستك جميلة! ⭐";}
+}
+canvas.addEventListener("pointerup",stopDrawing);
+canvas.addEventListener("pointercancel",stopDrawing);
+shapeButtons.forEach(btn=>btn.addEventListener("click",()=>{
+ shape=btn.dataset.shape;shapeFill=null;strokes=[];currentStroke=null;
+ shapeButtons.forEach(b=>b.classList.toggle("active",b===btn));draw();
+ feedback.textContent=shape==="circle"?"اخترت الدائرة! هيا نلوّنها.":"اخترت المربع! هيا نلوّنه.";
+ speak(shape==="circle"?"اخترت الدائرة. هيا نلوّنها!":"اخترت المربع. هيا نلوّنه!");
+}));
+swatches.forEach(btn=>btn.addEventListener("click",()=>{
+ color=btn.dataset.color;swatches.forEach(b=>b.classList.toggle("active",b===btn));
+ if(tool==="eraser")setTool("brush");
+ feedback.textContent="لون جميل! استخدمه في رسمتك.";
+}));
+function setTool(next){
+ tool=next;
+ document.getElementById("brush").classList.toggle("active",tool==="brush");
+ document.getElementById("fill").classList.toggle("active",tool==="fill");
+ document.getElementById("eraser").classList.toggle("active",tool==="eraser");
+}
+document.getElementById("brush").addEventListener("click",()=>{setTool("brush");speak("اختر قلم التلوين وارسم داخل الشكل.");});
+document.getElementById("eraser").addEventListener("click",()=>{setTool("eraser");speak("هذه الممحاة. امسح بها ما تريد.");});
+document.getElementById("fill").addEventListener("click",()=>{
+ shapeFill=color;strokes=[];currentStroke=null;setTool("fill");draw();
+ feedback.textContent="يا سلام! أصبح الشكل ملوّناً. يمكنك إضافة رسومات بالقلم أيضاً.";
+ speak("يا سلام! لونت الشكل كله. عمل رائع!");
+});
+document.getElementById("undo").addEventListener("click",()=>{
+ if(strokes.length){strokes.pop();draw();feedback.textContent="يمكنك المحاولة مرة أخرى.";}
+});
+document.getElementById("clear").addEventListener("click",()=>{
+ strokes=[];shapeFill=null;currentStroke=null;draw();feedback.textContent="مساحة الرسم جاهزة من جديد!";
+ speak("لا بأس، هيا نرسم من جديد.");
+});
+document.getElementById("save").addEventListener("click",()=>{
+ draw();
+ const link=document.createElement("a");link.download="رسمتي_الجميلة.png";link.href=canvas.toDataURL("image/png");link.click();
+ feedback.textContent="تم تجهيز رسمتك للحفظ. أحسنت يا فنان! 🎉";
+ speak("أحسنت يا فنان! هذه رسمتك الجميلة.");
+});
+draw();
+if("speechSynthesis" in window)speechSynthesis.onvoiceschanged=()=>{};
+</script>
+</body>
+</html>
