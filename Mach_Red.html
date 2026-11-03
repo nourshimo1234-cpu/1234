@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>هيا نطابق اللون الأحمر!</title>
+<style>
+:root{--red:#ef4444;--red-dark:#b91c1c;--cream:#fffaf2;--ink:#3c2d2d;--green:#16a34a;--gold:#fbbf24}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#fff5f5,#fff8e8);color:var(--ink);min-height:100vh}
+.wrap{max-width:1000px;margin:auto;padding:22px 16px 30px}
+header{text-align:center;margin-bottom:16px}
+h1{font-size:clamp(1.7rem,4vw,2.6rem);margin:8px 0;color:#c62828}
+.subtitle{font-size:clamp(1rem,2.4vw,1.25rem);margin:8px auto;max-width:700px;line-height:1.8}
+.topline{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.pill{background:white;border:2px solid #ffe0e0;border-radius:999px;padding:8px 15px;font-weight:bold;box-shadow:0 3px 0 #f4d1d1}
+.board{display:grid;grid-template-columns:1.4fr .9fr;gap:18px;align-items:stretch}
+.panel{background:#fff;border:3px solid #ffe0e0;border-radius:24px;padding:18px;box-shadow:0 8px 0 rgba(180,40,40,.07)}
+.panel h2{text-align:center;font-size:1.25rem;margin:0 0 14px;color:#9f2525}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{border:3px solid #f5d6d6;border-radius:18px;background:#fffdfb;min-height:145px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;cursor:grab;touch-action:manipulation;user-select:none;transition:transform .15s,border-color .15s,background .15s;box-shadow:0 4px 0 #f8e5e5}
+.card:active{cursor:grabbing;transform:scale(.97)}
+.card svg{width:min(100%,105px);height:90px;pointer-events:none}
+.card .name{font-weight:bold;font-size:.95rem;margin-top:5px;pointer-events:none}
+.card.selected{border-color:#e53935;background:#fff0f0;outline:3px solid #ffcaca}
+.card.done{opacity:.48;filter:grayscale(.1);border-color:#86d7a0;background:#f0fff4;cursor:default}
+.dropzone{min-height:280px;border:4px dashed #ef7777;border-radius:24px;background:#fff4f4;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;transition:.2s}
+.dropzone.over{background:#ffe0e0;border-color:#c62828;transform:scale(1.015)}
+.word{font-size:clamp(2.2rem,5vw,3.5rem);font-weight:900;color:#c62828;background:white;border:3px solid #ffc5c5;border-radius:18px;padding:12px 28px;box-shadow:0 5px 0 #f3caca;margin:10px 0}
+.dropzone p{line-height:1.7;margin:10px 0 0;font-size:1.05rem}
+.feedback{min-height:48px;text-align:center;font-weight:bold;font-size:1.15rem;padding:12px 8px;color:#a52626}
+.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:8px}
+button{font-family:inherit;border:0;border-radius:999px;padding:12px 22px;font-size:1rem;font-weight:bold;cursor:pointer;background:#c62828;color:white;box-shadow:0 4px 0 #8e1b1b}
+button.secondary{background:#fff;color:#9f2525;border:2px solid #f2baba;box-shadow:0 4px 0 #f3dddd}
+button:active{transform:translateY(2px);box-shadow:0 2px 0 #8e1b1b}
+.finish{display:none;text-align:center;background:#fff;border:3px solid #b7e8c4;border-radius:22px;padding:20px;margin-top:16px;font-size:1.25rem;line-height:1.8}
+.finish.show{display:block}
+.stars{font-size:2rem;letter-spacing:5px}
+@media(max-width:700px){.board{grid-template-columns:1fr}.dropzone{min-height:210px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-height:135px}.panel{padding:14px}}
+@media(max-width:380px){.cards{gap:8px}.card{padding:7px}.card svg{height:78px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div style="font-size:2.2rem" aria-hidden="true">🍎 🌹 🔴</div>
+  <h1>هيا نطابق اللون الأحمر!</h1>
+  <p class="subtitle">اسحب الصور الحمراء إلى كلمة <strong>أحمر</strong>. هل تستطيع اكتشاف كل الأشياء الحمراء؟</p>
+  <div class="topline"><div class="pill">⭐ الصور الصحيحة: <span id="score">0</span> / 3</div><div class="pill">🎨 فكّر قبل أن تسحب!</div></div>
+</header>
+<main class="board">
+<section class="panel">
+<h2>🧸 الصور المتاحة</h2>
+<div class="cards" id="cards">
+<div class="card" draggable="true" data-color="red" data-id="apple" aria-label="تفاحة حمراء">
+<svg viewBox="0 0 100 90" role="img" aria-label="تفاحة"><path d="M51 22 Q46 10 55 4" stroke="#76502b" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M53 14 Q72 2 79 14 Q67 25 53 20Z" fill="#39a852"/><path d="M50 29 C33 16 10 30 15 52 C20 77 38 84 50 77 C64 85 84 72 88 51 C92 29 68 16 50 29Z" fill="#ed3434" stroke="#c51f2b" stroke-width="2"/><ellipse cx="32" cy="39" rx="6" ry="11" fill="#ff8585" opacity=".8"/></svg>
+<div class="name">تفاحة</div></div>
+<div class="card" draggable="true" data-color="red" data-id="rose" aria-label="وردة حمراء">
+<svg viewBox="0 0 100 90" role="img" aria-label="وردة"><path d="M50 46 L50 83" stroke="#279447" stroke-width="6" stroke-linecap="round"/><path d="M49 67 Q28 51 23 66 Q34 78 49 71" fill="#43b85d"/><path d="M50 44 C30 52 20 34 33 22 C26 8 45 5 52 18 C65 3 82 17 71 30 C86 43 68 57 50 44Z" fill="#f12d43" stroke="#c81e35" stroke-width="2"/><path d="M49 39 C37 34 42 20 51 25 C61 16 69 29 59 36 Q55 43 49 39Z" fill="#ff7580"/></svg>
+<div class="name">وردة</div></div>
+<div class="card" draggable="true" data-color="red" data-id="ball" aria-label="كرة حمراء">
+<svg viewBox="0 0 100 90" role="img" aria-label="كرة"><circle cx="50" cy="45" r="34" fill="#ed3038" stroke="#c51f2b" stroke-width="3"/><path d="M23 23 Q47 42 27 70 M75 22 Q51 42 73 70 M18 45 Q50 60 82 45" fill="none" stroke="#ff9696" stroke-width="4"/><ellipse cx="38" cy="28" rx="8" ry="5" fill="#ffb0b0" transform="rotate(-35 38 28)"/></svg>
+<div class="name">كرة</div></div>
+<div class="card" draggable="true" data-color="blue" data-id="fish" aria-label="سمكة زرقاء">
+<svg viewBox="0 0 100 90" role="img" aria-label="سمكة"><path d="M22 45 L5 28 L5 62Z" fill="#3989e8"/><ellipse cx="48" cy="45" rx="31" ry="22" fill="#58a8ff" stroke="#2672c8" stroke-width="2"/><circle cx="66" cy="40" r="4" fill="#263238"/><path d="M40 27 Q55 45 40 63" stroke="#2672c8" stroke-width="3" fill="none"/><path d="M48 45 Q58 54 66 45" stroke="#2672c8" stroke-width="2" fill="none"/></svg>
+<div class="name">سمكة</div></div>
+<div class="card" draggable="true" data-color="yellow" data-id="duck" aria-label="بطة صفراء">
+<svg viewBox="0 0 100 90" role="img" aria-label="بطة"><ellipse cx="48" cy="56" rx="30" ry="22" fill="#ffd83d" stroke="#e4ad18" stroke-width="2"/><circle cx="61" cy="30" r="18" fill="#ffe45c" stroke="#e4ad18" stroke-width="2"/><path d="M76 30 L94 36 L76 41Z" fill="#f28b24"/><circle cx="66" cy="26" r="3" fill="#342c22"/><path d="M34 75 L30 83 M56 76 L60 83" stroke="#f28b24" stroke-width="4" stroke-linecap="round"/></svg>
+<div class="name">بطة</div></div>
+<div class="card" draggable="true" data-color="green" data-id="leaf" aria-label="ورقة خضراء">
+<svg viewBox="0 0 100 90" role="img" aria-label="ورقة"><path d="M17 72 Q15 22 80 12 Q81 65 17 72Z" fill="#38b65a" stroke="#218b3d" stroke-width="3"/><path d="M17 72 Q43 47 72 22 M40 52 L37 33 M52 42 L68 46" stroke="#d5f6d9" stroke-width="3" fill="none" stroke-linecap="round"/></svg>
+<div class="name">ورقة خضراء</div></div>
+</div>
+</section>
+<section class="panel">
+<h2>🎯 ضع الصور الحمراء هنا</h2>
+<div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="منطقة مطابقة كلمة أحمر">
+<div style="font-size:2.5rem" aria-hidden="true">👇</div>
+<div class="word">أحمر</div>
+<p>اسحب صورة حمراء إلى هنا<br>أو اضغط على الصورة ثم اضغط هنا</p>
+</div>
+<div class="feedback" id="feedback" aria-live="polite">هيا نبدأ! ابحث عن الصور الحمراء ❤️</div>
+<div class="actions"><button id="reset">🔄 إعادة اللعب</button><button class="secondary" id="shuffle">🎲 تغيير ترتيب الصور</button></div>
+</section>
+</main>
+<div class="finish" id="finish"><div class="stars">⭐ ⭐ ⭐</div><strong>أحسنت يا بطل!</strong><br>وجدت كل الصور الحمراء بنجاح!<br><button id="again" style="margin-top:10px">العب مرة أخرى</button></div>
+</div>
+<script>
+const cardsBox=document.getElementById('cards');
+const zone=document.getElementById('dropzone');
+const feedback=document.getElementById('feedback');
+const scoreEl=document.getElementById('score');
+const finish=document.getElementById('finish');
+let score=0, selected=null;
+function shuffleCards(){
+  const cards=[...cardsBox.querySelectorAll('.card')];
+  for(let i=cards.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cards[i],cards[j]]=[cards[j],cards[i]];}
+  cards.forEach(c=>cardsBox.appendChild(c));
+}
+function resetGame(){
+ score=0;selected=null;scoreEl.textContent='0';finish.classList.remove('show');
+ [...cardsBox.querySelectorAll('.card')].forEach(c=>{c.classList.remove('done','selected');c.draggable=true;});
+ shuffleCards();feedback.textContent='هيا نبدأ! ابحث عن الصور الحمراء ❤️';zone.classList.remove('over');
+}
+function choose(card){if(card.classList.contains('done'))return;selected=card;cardsBox.querySelectorAll('.card').forEach(c=>c.classList.toggle('selected',c===card));feedback.textContent='رائع! الآن اضغط على كلمة «أحمر».';}
+function accept(card){
+ if(!card||card.classList.contains('done'))return;
+ if(card.dataset.color==='red'){
+  card.classList.remove('selected');card.classList.add('done');card.draggable=false;selected=null;score++;scoreEl.textContent=score;
+  feedback.textContent=['أحسنت! هذه تفاحة حمراء 🍎','ممتاز! الوردة حمراء 🌹','برافو! الكرة حمراء 🔴'][Math.min(score-1,2)];
+  if(score===3){finish.classList.add('show');feedback.textContent='يا سلام! لقد وجدت كل الصور الحمراء! 🎉';}
+ }else{
+  feedback.textContent='حاول مرة أخرى 😊 هل هذا الشيء لونه أحمر؟';card.animate([{transform:'translateX(0)'},{transform:'translateX(-5px)'},{transform:'translateX(5px)'},{transform:'translateX(0)'}],{duration:240});
+ }
+}
+cardsBox.addEventListener('dragstart',e=>{const card=e.target.closest('.card');if(!card||card.classList.contains('done'))return;selected=card;e.dataTransfer.setData('text/plain',card.dataset.id);e.dataTransfer.effectAllowed='move';});
+cardsBox.addEventListener('click',e=>{const card=e.target.closest('.card');if(card)choose(card);});
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('over');});
+zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
+zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('over');const id=e.dataTransfer.getData('text/plain');const card=[...cardsBox.querySelectorAll('.card')].find(c=>c.dataset.id===id)||selected;accept(card);});
+zone.addEventListener('click',()=>{if(selected)accept(selected);else feedback.textContent='اضغط أولًا على صورة، ثم اضغط هنا 😊';});
+zone.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&selected){e.preventDefault();accept(selected);}});
+document.getElementById('reset').addEventListener('click',resetGame);
+document.getElementById('shuffle').addEventListener('click',()=>{shuffleCards();feedback.textContent='تغيّر ترتيب الصور! ابحث عن الأحمر 🎲';});
+document.getElementById('again').addEventListener('click',resetGame);
+shuffleCards();
+</script>
+</body>
+</html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>أشياء حمراء حولي</title><style>
+:root{--ink:#2d3b55;--blue:#4d91d4;--red:#e53935;--green:#299b67}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:15px;display:grid;place-items:center;background:linear-gradient(135deg,#fff0e9,#fff8df 55%,#eaf5ff);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(850px,100%);background:#fff;border-radius:26px;padding:clamp(17px,3vw,28px);box-shadow:0 12px 34px #304b6820;text-align:center}
+h1{font-size:clamp(25px,4.5vw,36px);color:#a92727;margin:4px 0 8px}
+p{font-size:clamp(16px,2.8vw,21px);line-height:1.8;margin:8px auto 16px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid #ffc94d;outline-offset:3px}
+.action{border:0;border-radius:16px;background:var(--blue);color:#fff;padding:13px 22px;min-height:49px;font-size:18px;font-weight:bold}
+.action.light{background:#edf3f8;color:#36516c}
+.feedback{min-height:55px;color:#25845b;font-weight:bold;font-size:20px;line-height:1.6;margin:12px 0}
+.small{font-size:13px;color:#718096}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:650px;margin:20px auto}
+.tile{background:#f8fbff;border:3px solid #e1ebf5;border-radius:20px;padding:12px 8px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 0 #e0eaf3}
+.tile .emoji{font-size:clamp(42px,8vw,64px);line-height:1.2}
+.tile .label{font-weight:bold;font-size:17px}
+.tile.selected{border-color:#e53935;background:#fff0ef;box-shadow:0 4px 0 #f3c1be}
+.tile.correct{border-color:#39a96b;background:#edfff4;box-shadow:0 4px 0 #b9e6cb}
+.tile.wrong{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+@media(max-width:520px){.grid{gap:8px}.tile{min-height:105px;padding:8px 4px}.tile .label{font-size:14px}}
+
+.prompt{background:#fff3f1;border:2px dashed #ef9a9a;border-radius:18px;padding:12px;margin:12px auto;max-width:650px}
+</style></head><body><main>
+<h1>🏠 أشياء حمراء حولي</h1>
+<p>هل رأيت هذه الأشياء من قبل؟ اضغط على الصورة، وتعرّف على اسمها ولونها.</p>
+<div class="grid" id="grid">
+<button class="tile" data-name="التفاحة" data-say="التفاحة حمراء"><span class="emoji">🍎</span><span class="label">تفاحة</span></button>
+<button class="tile" data-name="السيارة" data-say="السيارة حمراء"><span class="emoji">🚗</span><span class="label">سيارة</span></button>
+<button class="tile" data-name="الفراولة" data-say="الفراولة حمراء"><span class="emoji">🍓</span><span class="label">فراولة</span></button>
+<button class="tile" data-name="البالون" data-say="البالون أحمر"><span class="emoji">🎈</span><span class="label">بالون</span></button>
+<button class="tile" data-name="الزهرة" data-say="الزهرة حمراء"><span class="emoji">🌹</span><span class="label">زهرة</span></button>
+<button class="tile" data-name="القلب" data-say="القلب أحمر"><span class="emoji">❤️</span><span class="label">قلب</span></button>
+</div>
+<div class="prompt"><strong id="question">سؤال المعلمة:</strong><p id="detail">أين رأيت شيئاً أحمر في بيتك؟ اختر صورة ثم أخبر المعلمة.</p></div>
+<div class="feedback" id="feedback" aria-live="polite">اضغط على صورة لنبدأ الحديث! 💬</div>
+<div class="actions"><button class="action" id="ask">اسمع السؤال 🎤</button><button class="action light" id="reset">ابدأ من جديد 🔄</button></div>
+<p class="small">هذا النشاط للحوار الشفهي؛ اقبل إجابة الطفل بالكلمة أو بالإشارة، ثم وسّع إجابته بجملة قصيرة.</p>
+</main><script>
+
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="ar-EG";u.rate=.8;u.pitch=1.18;u.volume=1;
+ const voices=speechSynthesis.getVoices();
+ const ar=voices.filter(v=>/^ar([_-]|$)/i.test(v.lang));
+ const female=ar.find(v=>/female|woman|zira|sara|sahar|laila|leila|amira|mona|hoda|fatima|noura|reem|salma/i.test(v.name));
+ if(female)u.voice=female;
+ else if(ar.find(v=>/eg/i.test(v.lang)))u.voice=ar.find(v=>/eg/i.test(v.lang));
+ else if(ar[0])u.voice=ar[0];
+ speechSynthesis.speak(u);
+}
+
+const tiles=[...document.querySelectorAll(".tile")],feedback=document.getElementById("feedback"),detail=document.getElementById("detail");
+tiles.forEach(tile=>tile.addEventListener("click",()=>{
+ tiles.forEach(t=>t.classList.remove("selected"));tile.classList.add("selected");
+ feedback.textContent="أحسنت! "+tile.dataset.say+".";
+ detail.textContent="هل رأيت "+tile.dataset.name+" من قبل؟ ما لونها؟";
+ speak(tile.dataset.say+". ما لون "+tile.dataset.name+"؟");
+}));
+document.getElementById("ask").addEventListener("click",()=>speak("انظر حولك. هل ترى شيئاً أحمر؟ هل يمكنك أن تخبرني باسمه؟"));
+document.getElementById("reset").addEventListener("click",()=>{tiles.forEach(t=>t.classList.remove("selected"));feedback.textContent="اضغط على صورة لنبدأ الحديث!";detail.textContent="أين رأيت شيئاً أحمر في بيتك؟ اختر صورة ثم أخبر المعلمة.";speak("هيا نتعرف على أشياء حمراء.");});
+</script></body></html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كلمة أحمر وصورتها</title><style>
+:root{--ink:#2d3b55;--blue:#4d91d4;--red:#e53935;--green:#299b67}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:15px;display:grid;place-items:center;background:linear-gradient(135deg,#fff0e9,#fff8df 55%,#eaf5ff);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(850px,100%);background:#fff;border-radius:26px;padding:clamp(17px,3vw,28px);box-shadow:0 12px 34px #304b6820;text-align:center}
+h1{font-size:clamp(25px,4.5vw,36px);color:#a92727;margin:4px 0 8px}
+p{font-size:clamp(16px,2.8vw,21px);line-height:1.8;margin:8px auto 16px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid #ffc94d;outline-offset:3px}
+.action{border:0;border-radius:16px;background:var(--blue);color:#fff;padding:13px 22px;min-height:49px;font-size:18px;font-weight:bold}
+.action.light{background:#edf3f8;color:#36516c}
+.feedback{min-height:55px;color:#25845b;font-weight:bold;font-size:20px;line-height:1.6;margin:12px 0}
+.small{font-size:13px;color:#718096}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:650px;margin:20px auto}
+.tile{background:#f8fbff;border:3px solid #e1ebf5;border-radius:20px;padding:12px 8px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 0 #e0eaf3}
+.tile .emoji{font-size:clamp(42px,8vw,64px);line-height:1.2}
+.tile .label{font-weight:bold;font-size:17px}
+.tile.selected{border-color:#e53935;background:#fff0ef;box-shadow:0 4px 0 #f3c1be}
+.tile.correct{border-color:#39a96b;background:#edfff4;box-shadow:0 4px 0 #b9e6cb}
+.tile.wrong{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+@media(max-width:520px){.grid{gap:8px}.tile{min-height:105px;padding:8px 4px}.tile .label{font-size:14px}}
+
+.wordcard{display:inline-block;background:#e53935;color:#fff;border-radius:18px;padding:13px 35px;font-size:34px;font-weight:bold;box-shadow:0 5px 0 #b71c1c;margin:10px}
+#round{color:#a92727;font-weight:bold}
+</style></head><body><main>
+<h1>🧩 كلمة «أحمر» وصورتها</h1>
+<p>انظر إلى الكلمة، ثم اختر الصورة التي تناسبها. كلمة اليوم هي:</p>
+<div class="wordcard">أَحْمَر</div>
+<div id="round">السؤال ١ من ٤</div>
+<div class="grid" id="grid"></div>
+<div class="feedback" id="feedback" aria-live="polite">أين الصورة الحمراء؟</div>
+<div class="actions"><button class="action" id="next" disabled>السؤال التالي ←</button><button class="action light" id="restart">إعادة اللعب 🔄</button></div>
+<p class="small">تساعد المعلمة الطفل على نطق كلمة «أحمر» بوضوح وربطها بالشيء المصوّر.</p>
+</main><script>
+
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="ar-EG";u.rate=.8;u.pitch=1.18;u.volume=1;
+ const voices=speechSynthesis.getVoices();
+ const ar=voices.filter(v=>/^ar([_-]|$)/i.test(v.lang));
+ const female=ar.find(v=>/female|woman|zira|sara|sahar|laila|leila|amira|mona|hoda|fatima|noura|reem|salma/i.test(v.name));
+ if(female)u.voice=female;
+ else if(ar.find(v=>/eg/i.test(v.lang)))u.voice=ar.find(v=>/eg/i.test(v.lang));
+ else if(ar[0])u.voice=ar[0];
+ speechSynthesis.speak(u);
+}
+
+const questions=[
+ [{e:"🍎",n:"تفاحة",ok:true},{e:"🍌",n:"موزة",ok:false},{e:"🍐",n:"كمثرى",ok:false}],
+ [{e:"🚗",n:"سيارة حمراء",ok:true},{e:"🚕",n:"سيارة صفراء",ok:false},{e:"🚙",n:"سيارة خضراء",ok:false}],
+ [{e:"🌹",n:"زهرة حمراء",ok:true},{e:"🌻",n:"زهرة صفراء",ok:false},{e:"🌼",n:"زهرة بيضاء",ok:false}],
+ [{e:"🎈",n:"بالون أحمر",ok:true},{e:"🎈",n:"بالون أزرق",ok:false},{e:"🎈",n:"بالون أصفر",ok:false}]
+];
+let q=0,answered=false;
+const grid=document.getElementById("grid"),feedback=document.getElementById("feedback"),next=document.getElementById("next");
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function render(){
+ answered=false;next.disabled=true;grid.innerHTML="";
+ document.getElementById("round").textContent="السؤال "+(q+1)+" من ٤";
+ shuffle(questions[q]).forEach(item=>{
+  const b=document.createElement("button");b.className="tile";b.innerHTML='<span class="emoji">'+item.e+'</span><span class="label">'+item.n+'</span>';
+  b.addEventListener("click",()=>{
+   if(answered)return;
+   if(item.ok){answered=true;b.classList.add("correct");feedback.textContent="أحسنت! هذه صورة حمراء. ⭐";speak("أحسنت! هذه صورة حمراء. قل: أحمر.");next.disabled=false;}
+   else{b.classList.add("wrong");feedback.textContent="حاول مرة أخرى. ابحث عن اللون الأحمر.";speak("هذه ليست الصورة الحمراء. حاول مرة أخرى.");setTimeout(()=>b.classList.remove("wrong"),450);}
+  });grid.appendChild(b);
+ });
+ feedback.textContent="اختر الصورة التي تدل على كلمة أحمر.";
+}
+next.addEventListener("click",()=>{if(q<3){q++;render();}else{feedback.textContent="رائع! عرفت كلمة أحمر وربطتها بالصور! 🏆";speak("رائع! أنت تعرف اللون الأحمر.");next.disabled=true;}});
+document.getElementById("restart").addEventListener("click",()=>{q=0;render();});
+render();
+</script></body></html>
