@@ -1,0 +1,48 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>أين نرى المربع؟</title>
+<style>
+:root{--ink:#24324a;--purple:#6653b8;--green:#21875e;--red:#c94e5d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f0f7ff,#fff8ec);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+.wrap{max-width:980px;margin:auto;padding:18px}
+header,.panel{background:#fff;border-radius:24px;padding:20px;text-align:center;box-shadow:0 8px 24px #26385b12}
+h1{margin:3px 0 8px;color:#51419a;font-size:clamp(24px,4vw,34px)}
+.sub{color:#667085}
+.progress{height:10px;background:#e9eaf2;border-radius:20px;overflow:hidden;margin-top:14px}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#55c69a,#8b75df);transition:.25s}
+.panel{margin-top:17px}
+.prompt{font-size:clamp(20px,3vw,27px);font-weight:bold;margin:6px 0 18px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:13px}
+.tile{border:3px solid #e8eaf3;background:#fbfcff;border-radius:20px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;cursor:pointer;font-size:19px;font-weight:bold;color:var(--ink)}
+.tile:focus{outline:3px solid #b4a6f0}
+.tile svg{width:100px;height:100px;max-width:100%}
+.tile .emoji{font-size:76px;line-height:1.1}
+.tile.correct{border-color:#31ad7b;background:#e9fff4}
+.tile.wrong{border-color:#e17a82;background:#fff0f1}
+.feedback{font-size:20px;font-weight:bold;min-height:34px;margin-top:15px;color:var(--green)}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:17px}
+button.action{border:0;border-radius:14px;padding:12px 20px;font-size:17px;font-weight:bold;cursor:pointer;background:#7058c8;color:white}
+button.secondary{background:#ebe8fa;color:#51418d}
+.small{font-size:14px;color:#667085;margin-top:12px}
+.word{font-size:29px;color:#55439c;background:#f0edff;padding:13px 30px;border-radius:18px;display:inline-block}
+.target{width:155px;height:155px;border:3px dashed #b9b1d9;border-radius:22px;display:grid;place-items:center;margin:auto;background:#fff}
+.note{background:#f7f5ff;border-radius:16px;padding:12px;margin:12px auto;max-width:700px;color:#51418d}
+@media(max-width:520px){.wrap{padding:11px}.panel{padding:14px}.tile{min-height:125px}}
+</style></head><body><main class="wrap">
+<header><h1>أين نرى المربع؟</h1><div class="sub">النشاط الثالث · ربط المربع بأشياء من الحياة اليومية</div><div class="progress"><div class="bar" id="bar"></div></div></header>
+<section class="panel"><div class="prompt" id="prompt">اختر الأشياء التي تشبه شكل المربع.</div><div class="grid" id="grid"></div>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="actions"><button class="action secondary" onclick="speakPrompt()">🔊 اسمع التعليمات</button><button class="action" onclick="resetGame()">↻ ابدأ من جديد</button></div>
+<div class="small">يمكن للطفل الضغط أو اللمس. شجّعيه أن ينطق اسم الشكل بصوت واضح.</div></section></main>
+<script>
+const $=id=>document.getElementById(id);
+function say(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-EG';u.rate=.86;speechSynthesis.speak(u)}
+function speakPrompt(){say($('prompt').innerText)}
+function progress(n,total){$('bar').style.width=(n/total*100)+'%'}
+
+const objects=[['🪟','نافذة مربعة',1],['🟫','بلاطة مربعة',1],['🧇','قطعة وافل مربعة',1],['🛏️','سرير',0],['⚽','كرة',0],['🍌','موزة',0]];
+let n=0;
+function render(){n=0;progress(0,3);$('grid').innerHTML='';[...objects].sort(()=>Math.random()-.5).forEach(o=>{let b=document.createElement('button');b.className='tile';b.innerHTML='<span class="emoji">'+o[0]+'</span><span>'+o[1]+'</span>';b.onclick=()=>{if(b.dataset.done)return;if(o[2]){b.dataset.done=1;b.classList.add('correct');n++;$('feedback').textContent='صحيح! '+o[1]+' يشبه المربع.';say('صحيح! '+o[1]+' يشبه المربع');progress(n,3);if(n===3){$('feedback').textContent='رائع! تعرفت على المربعات حولك.';say('رائع! تعرفت على المربعات حولك')}}else{b.classList.add('wrong');$('feedback').textContent='هذا الشيء ليس مربعًا. جرّب شيئًا آخر.';say('جرّب شيئًا آخر')}};$('grid').appendChild(b)})}
+function resetGame(){render();$('feedback').textContent=''}render();
+
+</script></body></html>

@@ -1,0 +1,48 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>صائد المربعات</title>
+<style>
+:root{--ink:#24324a;--purple:#6653b8;--green:#21875e;--red:#c94e5d}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:linear-gradient(135deg,#f0f7ff,#fff8ec);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+.wrap{max-width:980px;margin:auto;padding:18px}
+header,.panel{background:#fff;border-radius:24px;padding:20px;text-align:center;box-shadow:0 8px 24px #26385b12}
+h1{margin:3px 0 8px;color:#51419a;font-size:clamp(24px,4vw,34px)}
+.sub{color:#667085}
+.progress{height:10px;background:#e9eaf2;border-radius:20px;overflow:hidden;margin-top:14px}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#55c69a,#8b75df);transition:.25s}
+.panel{margin-top:17px}
+.prompt{font-size:clamp(20px,3vw,27px);font-weight:bold;margin:6px 0 18px;line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:13px}
+.tile{border:3px solid #e8eaf3;background:#fbfcff;border-radius:20px;min-height:150px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:12px;cursor:pointer;font-size:19px;font-weight:bold;color:var(--ink)}
+.tile:focus{outline:3px solid #b4a6f0}
+.tile svg{width:100px;height:100px;max-width:100%}
+.tile .emoji{font-size:76px;line-height:1.1}
+.tile.correct{border-color:#31ad7b;background:#e9fff4}
+.tile.wrong{border-color:#e17a82;background:#fff0f1}
+.feedback{font-size:20px;font-weight:bold;min-height:34px;margin-top:15px;color:var(--green)}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:17px}
+button.action{border:0;border-radius:14px;padding:12px 20px;font-size:17px;font-weight:bold;cursor:pointer;background:#7058c8;color:white}
+button.secondary{background:#ebe8fa;color:#51418d}
+.small{font-size:14px;color:#667085;margin-top:12px}
+.word{font-size:29px;color:#55439c;background:#f0edff;padding:13px 30px;border-radius:18px;display:inline-block}
+.target{width:155px;height:155px;border:3px dashed #b9b1d9;border-radius:22px;display:grid;place-items:center;margin:auto;background:#fff}
+.note{background:#f7f5ff;border-radius:16px;padding:12px;margin:12px auto;max-width:700px;color:#51418d}
+@media(max-width:520px){.wrap{padding:11px}.panel{padding:14px}.tile{min-height:125px}}
+</style></head><body><main class="wrap">
+<header><h1>صائد المربعات</h1><div class="sub">النشاط الثاني · تمييز المربع بين الأشكال</div><div class="progress"><div class="bar" id="bar"></div></div></header>
+<section class="panel"><div class="prompt" id="prompt">اضغط على كل مربع تراه بين الأشكال.</div><div class="grid" id="grid"></div>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="actions"><button class="action secondary" onclick="speakPrompt()">🔊 اسمع التعليمات</button><button class="action" onclick="resetGame()">↻ ابدأ من جديد</button></div>
+<div class="small">يمكن للطفل الضغط أو اللمس. شجّعيه أن ينطق اسم الشكل بصوت واضح.</div></section></main>
+<script>
+const $=id=>document.getElementById(id);
+function say(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-EG';u.rate=.86;speechSynthesis.speak(u)}
+function speakPrompt(){say($('prompt').innerText)}
+function progress(n,total){$('bar').style.width=(n/total*100)+'%'}
+
+const shapes=[['مربع',`<svg viewBox="0 0 120 120" role="img" aria-label="مربع"><rect x="18" y="18" width="84" height="84" rx="3" fill="#55a9e8" stroke="#287dbd" stroke-width="5"/></svg>`,1],['دائرة',`<svg viewBox="0 0 120 120" role="img" aria-label="دائرة"><circle cx="60" cy="60" r="43" fill="#f5a623" stroke="#d88413" stroke-width="5"/></svg>`,0],['مثلث',`<svg viewBox="0 0 120 120" role="img" aria-label="مثلث"><path d="M60 13 L108 102 H12 Z" fill="#ee7b91" stroke="#c94d69" stroke-width="5" stroke-linejoin="round"/></svg>`,0],['مربع',`<svg viewBox="0 0 120 120" role="img" aria-label="مربع"><rect x="18" y="18" width="84" height="84" rx="3" fill="#55a9e8" stroke="#287dbd" stroke-width="5"/></svg>`,1],['مستطيل',`<svg viewBox="0 0 120 120" role="img" aria-label="مستطيل"><rect x="8" y="31" width="104" height="58" rx="3" fill="#9a86d9" stroke="#6250b0" stroke-width="5"/></svg>`,0],['مربع',`<svg viewBox="0 0 120 120" role="img" aria-label="مربع"><rect x="18" y="18" width="84" height="84" rx="3" fill="#55a9e8" stroke="#287dbd" stroke-width="5"/></svg>`,1]];
+let n=0;
+function render(){n=0;progress(0,3);$('grid').innerHTML='';[...shapes].sort(()=>Math.random()-.5).forEach(s=>{let b=document.createElement('button');b.className='tile';b.innerHTML=s[1]+'<span>'+s[0]+'</span>';b.onclick=()=>{if(b.dataset.done)return;if(s[2]){b.dataset.done=1;b.classList.add('correct');n++;$('feedback').textContent='أحسنت! وجدت مربعًا.';say('أحسنت! وجدت مربعًا');progress(n,3);if(n===3){$('feedback').textContent='ممتاز! عثرت على كل المربعات.';say('ممتاز! عثرت على كل المربعات')}}else{b.classList.add('wrong');$('feedback').textContent='هذا شكل آخر. ابحث عن أربعة أضلاع متساوية.';say('هذا شكل آخر. ابحث عن المربع')}};$('grid').appendChild(b)})}
+function resetGame(){render();$('feedback').textContent=''}render();
+
+</script></body></html>
