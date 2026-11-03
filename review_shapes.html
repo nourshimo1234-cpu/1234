@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مغامرة مراجعة الأشكال</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#e9f7ff,#fff4e8);color:#24324a;min-height:100vh;padding:18px}
+.wrap{max-width:980px;margin:auto}.top{text-align:center;background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 25px #31506a18}
+h1{margin:0 0 8px;color:#176b87;font-size:clamp(25px,4vw,38px)}.sub{font-size:19px;color:#52647a}
+.progress{height:12px;background:#e7edf2;border-radius:20px;margin:18px auto;max-width:500px;overflow:hidden}.bar{height:100%;width:0;background:#27ae8b;transition:.3s}
+.prompt{text-align:center;font-size:clamp(22px,3vw,30px);font-weight:bold;margin:22px 0 12px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.tile{background:#fff;border:3px solid transparent;border-radius:22px;min-height:175px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;cursor:pointer;box-shadow:0 5px 15px #28435b15;font-size:21px;font-weight:bold;transition:.2s}.tile:hover{transform:translateY(-4px);border-color:#8bd6df}.shape{width:88px;height:88px}.circle{border-radius:50%;background:#f4a62a}.square{background:#4c9be8}.triangle{width:0;height:0;border-left:48px solid transparent;border-right:48px solid transparent;border-bottom:88px solid #e56b8a}.rect{width:112px;height:68px;background:#8b72d9;border-radius:5px}
+.feedback{text-align:center;min-height:44px;font-size:22px;font-weight:bold;margin:17px}.actions{text-align:center;display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+button{border:0;border-radius:15px;padding:13px 24px;font-size:19px;font-weight:bold;cursor:pointer;background:#176b87;color:white}button.secondary{background:#f0a23a;color:#35250c}.score{text-align:center;font-size:19px;background:#fff;border-radius:15px;padding:12px;margin:15px auto;max-width:350px}
+@media(max-width:650px){.grid{grid-template-columns:repeat(2,1fr)}.tile{min-height:145px}.shape{transform:scale(.8)}}
+</style></head><body><main class="wrap">
+<section class="top"><h1>🌈 مغامرة مراجعة الأشكال</h1><div class="sub">هيا نتذكر الأشكال التي تعرفنا عليها!</div><div class="progress"><div class="bar" id="bar"></div></div></section>
+<div class="prompt" id="prompt">اضغط على الدائرة</div><section class="grid" id="grid"></section>
+<div class="feedback" id="feedback" aria-live="polite">اختر الشكل الصحيح.</div>
+<div class="score" id="score">الإجابات الصحيحة: 0 من 4</div>
+<div class="actions"><button onclick="next()">السؤال التالي ←</button><button class="secondary" onclick="restart()">ابدأ من جديد ↻</button></div>
+</main>
+<script>
+const rounds=[{name:"الدائرة",kind:"circle"},{name:"المربع",kind:"square"},{name:"المثلث",kind:"triangle"},{name:"المستطيل",kind:"rect"}];
+let i=0,correct=0,locked=false;
+const distract=[{name:"الدائرة",kind:"circle"},{name:"المربع",kind:"square"},{name:"المثلث",kind:"triangle"},{name:"المستطيل",kind:"rect"}];
+function speak(t){if(!('speechSynthesis'in window))return; speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-EG';u.rate=.85;speechSynthesis.speak(u)}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function draw(){locked=false;document.getElementById('prompt').textContent='اضغط على شكل '+rounds[i].name;document.getElementById('feedback').textContent='أين '+rounds[i].name+'؟';document.getElementById('bar').style.width=(i/4*100)+'%';let opts=shuffle(distract);document.getElementById('grid').innerHTML=opts.map(o=>`<button class="tile" onclick="choose('${o.kind}')" aria-label="${o.name}"><span class="shape ${o.kind}"></span><span>${o.name}</span></button>`).join('');document.getElementById('score').textContent=`الإجابات الصحيحة: ${correct} من 4`}
+function choose(k){if(locked)return;locked=true;if(k===rounds[i].kind){correct++;document.getElementById('feedback').textContent='👏 أحسنت! هذه هي '+rounds[i].name; speak('أحسنت! هذه هي '+rounds[i].name)}else{document.getElementById('feedback').textContent='حاول مرة أخرى في السؤال التالي. هذا شكل مختلف.';speak('محاولة جميلة. لننتقل للسؤال التالي.')}document.getElementById('score').textContent=`الإجابات الصحيحة: ${correct} من 4`}
+function next(){if(i<3){i++;draw()}else{document.getElementById('prompt').textContent='🎉 انتهت المراجعة!';document.getElementById('grid').innerHTML='';document.getElementById('feedback').textContent=`رائع! حصلت على ${correct} إجابة صحيحة من 4.`;document.getElementById('bar').style.width='100%';speak('رائع! انتهت مراجعة الأشكال.')} }
+function restart(){i=0;correct=0;draw()}draw();
+</script></body></html>
