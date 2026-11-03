@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أين اللون الأخضر؟</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#fff;font-family:Tahoma,Arial,sans-serif;color:#123b63;text-align:center}
+main{max-width:1000px;margin:auto;padding:22px 24px 18px}
+h1{font-size:clamp(30px,5vw,46px);color:#1762a0;margin:8px 0 24px}
+.intro{font-size:clamp(17px,2.5vw,23px);margin:18px 0 24px;color:#202b35}
+.round{font-size:22px;font-weight:bold;color:#1762a0;margin:24px 0}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.item{min-height:188px;border:3px solid #dce8f5;border-radius:23px;background:#fbfdff;box-shadow:0 5px 0 #e4edf5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;cursor:pointer;padding:10px 5px;font:inherit;transition:transform .15s,border-color .15s,background .15s}
+.item:hover{transform:translateY(-2px)}
+.item svg{width:130px;height:112px;max-width:90%}
+.item strong{font-size:21px;color:#101820}
+.item.correct{border-color:#28a85a;background:#f1fff4;box-shadow:0 5px 0 #d6f0dd}
+.item.wrong{animation:shake .25s}
+.item:disabled{cursor:default}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.instruction{font-size:25px;font-weight:bold;color:#19834b;margin:28px 0 44px;min-height:34px}
+.controls{display:flex;justify-content:center;gap:13px;flex-wrap:wrap}
+button.control{border:0;border-radius:18px;background:#91bce8;color:#fff;padding:16px 24px;font-size:20px;font-weight:bold;cursor:pointer;min-width:180px}
+button.control.secondary{background:#edf2f7;color:#31516e}
+button.control:disabled{opacity:.55;cursor:not-allowed}
+.note{font-size:16px;color:#6b7e91;margin-top:25px;line-height:1.8}
+@media(max-width:650px){main{padding:12px}.grid{gap:9px}.item{min-height:145px;border-radius:17px}.item svg{height:82px}.item strong{font-size:16px}.instruction{font-size:20px;margin:22px 0 30px}.round{font-size:19px}}
+</style>
+</head>
+<body>
+<main>
+<h1>🟢 أين اللون الأخضر؟</h1>
+<p class="intro">اختر الأشياء التي لونها أخضر واضح. انظر إلى لون كل شيء قبل الضغط عليه.</p>
+<div class="round" id="round">الجولة الأولى من ٢</div>
+<div class="grid" id="grid"></div>
+<div class="instruction" id="message">اضغط على الأشياء الخضراء فقط</div>
+<div class="controls">
+<button class="control" id="next" disabled>الجولة التالية ←</button>
+<button class="control secondary" id="reset">ابدأ من جديد</button>
+</div>
+<p class="note" id="note">الأشياء الخضراء: كوب أخضر، كرة خضراء، مكعب أخضر، ورقة خضراء. وكلها مرسومة بأخضر واضح وثابت.</p>
+</main>
+<script>
+const art = {
+cup:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M28 22H99L91 94H38Z" fill="#20a84b" stroke="#087b31" stroke-width="5"/><path d="M99 34H116Q132 34 128 54Q125 72 96 70" fill="none" stroke="#087b31" stroke-width="9" stroke-linecap="round"/></svg>`,
+ball:`<svg viewBox="0 0 140 110" aria-hidden="true"><circle cx="70" cy="55" r="43" fill="#20a84b" stroke="#087b31" stroke-width="5"/><path d="M35 29Q70 55 105 29M35 81Q70 55 105 81" fill="none" stroke="#bdf0ca" stroke-width="5"/></svg>`,
+cube:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M70 9L119 35L70 62L21 35Z" fill="#45c978" stroke="#087b31" stroke-width="4"/><path d="M21 35L70 62V103L21 76Z" fill="#159447" stroke="#087b31" stroke-width="4"/><path d="M119 35L70 62V103L119 76Z" fill="#087b31" stroke="#075d28" stroke-width="4"/></svg>`,
+leaf:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M18 93Q20 20 122 12Q117 87 18 93Z" fill="#20a84b" stroke="#087b31" stroke-width="4"/><path d="M20 91L107 23M53 66L43 43M74 50L94 53" fill="none" stroke="#c8f5d1" stroke-width="4"/></svg>`,
+apple:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M70 32C49 17 22 31 24 61Q28 99 70 91Q112 99 116 61C118 31 91 17 70 32Z" fill="#ed3038" stroke="#a71924" stroke-width="4"/><path d="M70 30Q66 12 80 5" fill="none" stroke="#76502b" stroke-width="7" stroke-linecap="round"/><path d="M79 13Q101 1 113 17Q94 31 79 13Z" fill="#30a653"/></svg>`,
+banana:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M20 19Q37 77 102 73Q119 71 126 49Q120 96 78 99Q26 98 11 34Z" fill="#f4d21d" stroke="#b58a00" stroke-width="4"/><path d="M20 19L15 11M126 49L132 41" stroke="#76502b" stroke-width="6" stroke-linecap="round"/></svg>`,
+bluecup:`<svg viewBox="0 0 140 110" aria-hidden="true"><path d="M28 22H99L91 94H38Z" fill="#1685dc" stroke="#07569b" stroke-width="5"/><path d="M99 34H116Q132 34 128 54Q125 72 96 70" fill="none" stroke="#07569b" stroke-width="9" stroke-linecap="round"/></svg>`,
+yellowball:`<svg viewBox="0 0 140 110" aria-hidden="true"><circle cx="70" cy="55" r="43" fill="#ffd52a" stroke="#d99a00" stroke-width="5"/><path d="M35 29Q70 55 105 29M35 81Q70 55 105 81" fill="none" stroke="#fff0a3" stroke-width="5"/></svg>`
+};
+const rounds=[
+[
+{id:'cup',name:'كوب أخضر',ok:true},{id:'bluecup',name:'كوب أزرق',ok:false},{id:'ball',name:'كرة خضراء',ok:true},
+{id:'banana',name:'موزة صفراء',ok:false},{id:'cube',name:'مكعب أخضر',ok:true},{id:'apple',name:'تفاحة حمراء',ok:false}
+],
+[
+{id:'leaf',name:'ورقة خضراء',ok:true},{id:'yellowball',name:'كرة صفراء',ok:false},{id:'ball',name:'كرة خضراء',ok:true},
+{id:'bluecup',name:'كوب أزرق',ok:false},{id:'cup',name:'كوب أخضر',ok:true},{id:'banana',name:'موزة صفراء',ok:false}
+]
+];
+let roundIndex=0, found=new Set(), locked=false;
+const grid=document.getElementById('grid'), message=document.getElementById('message'), next=document.getElementById('next');
+function speak(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-EG';u.rate=.88;u.pitch=1.18;const v=speechSynthesis.getVoices().find(x=>/^ar([_-]|$)/i.test(x.lang));if(v)u.voice=v;speechSynthesis.speak(u)}
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function draw(){
+ found=new Set();locked=false;next.disabled=true;
+ document.getElementById('round').textContent=`الجولة ${roundIndex===0?'الأولى':'الثانية'} من ٢`;
+ message.textContent='اضغط على الأشياء الخضراء فقط';
+ grid.innerHTML='';
+ shuffle(rounds[roundIndex]).forEach((o,i)=>{
+ const b=document.createElement('button');b.className='item';b.type='button';b.innerHTML=art[o.id]+`<strong>${o.name}</strong>`;
+ b.addEventListener('click',()=>{
+ if(b.disabled||locked)return;
+ if(o.ok){b.classList.add('correct');b.disabled=true;found.add(i);message.textContent=found.size===3?'أحسنت! وجدت كل الأشياء الخضراء! 🌟':'أحسنت! هذا شيء أخضر.';
+ speak(found.size===3?'رائع! لقد وجدت كل الأشياء الخضراء. أحسنت!':'أحسنت! هذا شيء أخضر.');
+ if(found.size===3){next.disabled=false;if(roundIndex===1){next.textContent='انتهى النشاط ✓';}}
+ }else{b.classList.add('wrong');message.textContent='هذه الصورة ليست خضراء. حاول مرة أخرى.';speak('حاول مرة أخرى. ابحث عن اللون الأخضر.');setTimeout(()=>b.classList.remove('wrong'),350);}
+ });grid.appendChild(b);
+ });
+}
+next.addEventListener('click',()=>{if(next.disabled)return;if(roundIndex===0){roundIndex=1;next.textContent='الجولة التالية ←';draw();}else{message.textContent='رائع! تعرفت على الأشياء الخضراء في الجولتين! 🏆';speak('رائع! أنهيت النشاط بنجاح.');next.disabled=true;}});
+document.getElementById('reset').addEventListener('click',()=>{roundIndex=0;next.textContent='الجولة التالية ←';draw();});
+draw();
+</script>
+</body>
+</html>

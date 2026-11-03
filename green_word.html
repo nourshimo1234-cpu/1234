@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>كلمة أخضر وصورتها</title>
+<style>
+:root{--green:#168746;--dark:#086331;--pale:#eaf7ee;--line:#d8eadf;--ink:#123d28}
+*{box-sizing:border-box}
+body{margin:0;background:#fff;color:var(--ink);font-family:Tahoma,Arial,sans-serif}
+main{max-width:1000px;margin:auto;padding:20px 22px 30px;text-align:center}
+h1{font-size:clamp(28px,4vw,44px);color:#1769ad;margin:7px 0 24px;font-weight:800}
+h1 .puzzle{margin-right:10px}
+.instruction{font-size:clamp(17px,2.2vw,23px);line-height:1.8;margin:0 auto 22px;color:#172b20}
+.word{display:inline-block;min-width:168px;padding:8px 28px 12px;border-radius:20px;background:var(--green);color:#fff;font-size:clamp(36px,5vw,52px);font-weight:800;letter-spacing:2px}
+.counter{font-size:21px;font-weight:800;color:var(--dark);margin:0 0 27px}
+.question{font-size:clamp(18px,2.2vw,23px);margin:0 0 25px;color:#172b20}
+.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-width:870px;margin:0 auto}
+.option{border:3px solid var(--line);border-radius:22px;background:#fbfffc;min-height:188px;padding:18px 10px 14px;box-shadow:0 5px 0 #e3eee7;display:flex;flex-direction:column;align-items:center;justify-content:space-between;gap:8px;cursor:pointer;font:inherit;transition:.18s}
+.option:hover{border-color:#8ac9a0;transform:translateY(-2px)}
+.option:focus-visible{outline:4px solid #9cdbaf;outline-offset:3px}
+.option.selected{border-color:var(--green);background:var(--pale);box-shadow:0 5px 0 #cce8d4}
+.option svg{width:112px;height:112px;max-width:100%}
+.option strong{font-size:21px;color:#111}
+.feedback{min-height:46px;margin:24px 0 32px;font-size:clamp(21px,2.6vw,27px);font-weight:800;color:var(--green)}
+.actions{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+.action{border:0;border-radius:18px;padding:15px 26px;font-size:20px;font-weight:800;cursor:pointer}
+.next{background:var(--green);color:white}
+.next:disabled{background:#9bcbaa;cursor:not-allowed}
+.reset{background:#edf3ef;color:#315340}
+.action:focus-visible{outline:4px solid #a5dcb5;outline-offset:3px}
+@media(max-width:600px){main{padding:14px 12px 24px}.options{gap:9px}.option{min-height:150px;padding:10px 5px;border-radius:16px}.option svg{width:85px;height:85px}.option strong{font-size:16px}.action{font-size:17px;padding:13px 18px}}
+@media(max-width:390px){.options{grid-template-columns:1fr;max-width:260px}.option{min-height:125px;flex-direction:row;justify-content:space-evenly}.option svg{width:80px;height:80px}}
+</style>
+</head>
+<body>
+<main>
+  <h1><span class="puzzle">🧩</span> كلمة «أخضر» وصورتها</h1>
+  <p class="instruction">انظر إلى الكلمة، ثم اختر الشيء المرسوم باللون الأخضر الواضح.</p>
+  <div class="word" id="word">أَخْضَر</div>
+  <div class="counter" id="counter">السؤال 1 من 4</div>
+  <p class="question" id="question">اختر الصورة التي لونها أخضر.</p>
+  <section class="options" id="options" aria-label="اختيارات الصور"></section>
+  <div class="feedback" id="feedback" aria-live="polite">اختر الصورة التي لونها أخضر.</div>
+  <div class="actions">
+    <button class="action next" id="next" disabled>السؤال التالي ←</button>
+    <button class="action reset" id="reset">إعادة اللعب</button>
+  </div>
+</main>
+<script>
+const rounds=[
+ {kind:'ball',names:['كرة حمراء','كرة زرقاء','كرة خضراء'],correct:2},
+ {kind:'shirt',names:['قميص أخضر','قميص أحمر','قميص أزرق'],correct:0},
+ {kind:'car',names:['سيارة زرقاء','سيارة خضراء','سيارة حمراء'],correct:1},
+ {kind:'cube',names:['مكعب أحمر','مكعب أخضر','مكعب أزرق'],correct:1}
+];
+const colors={أحمر:{fill:'#e53935',stroke:'#a91515'},أزرق:{fill:'#1685d5',stroke:'#07549a'},أخضر:{fill:'#27a653',stroke:'#08713a'}};
+const svgFor=(kind,color)=>{
+ const c=colors[color], common=`fill="${c.fill}" stroke="${c.stroke}" stroke-width="5"`;
+ if(kind==='ball')return `<svg viewBox="0 0 120 120" role="img" aria-label="كرة ${color}"><circle cx="60" cy="60" r="44" ${common}/><path d="M22 37q38 27 76 0M22 83q38-27 76 0" fill="none" stroke="#c8f2d4" stroke-width="5"/></svg>`;
+ if(kind==='shirt')return `<svg viewBox="0 0 140 120" role="img" aria-label="قميص ${color}"><path d="M46 17 24 29 7 53l20 16 13-14v49h60V55l13 14 20-16-17-24-22-12q-8 17-24 17T46 17z" ${common}/><path d="M46 17q8 17 24 17t22-17" fill="none" stroke="${c.stroke}" stroke-width="4"/></svg>`;
+ if(kind==='car')return `<svg viewBox="0 0 150 120" role="img" aria-label="سيارة ${color}"><path d="M20 70 30 43q4-12 17-12h57q11 0 17 12l10 16q9 5 9 17v10H11V76q0-5 9-6z" ${common}/><path d="m40 43-9 20h39V35H50q-6 0-10 8zm38-8v28h42l-9-20q-3-8-12-8z" fill="#d8f3df" stroke="${c.stroke}" stroke-width="3"/><circle cx="40" cy="87" r="12" fill="#263b31"/><circle cx="116" cy="87" r="12" fill="#263b31"/></svg>`;
+ return `<svg viewBox="0 0 140 120" role="img" aria-label="مكعب ${color}"><path d="M70 8 128 38 70 68 12 38z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="4"/><path d="M12 38 70 68v42L12 80z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="4"/><path d="M128 38 70 68v42l58-30z" fill="${c.fill}" stroke="${c.stroke}" stroke-width="4"/></svg>`;
+};
+let current=0,answered=false;
+const optionsEl=document.getElementById('options'),feedback=document.getElementById('feedback'),next=document.getElementById('next');
+function render(){
+ answered=false;next.disabled=true;
+ document.getElementById('counter').textContent=`السؤال ${current+1} من ${rounds.length}`;
+ feedback.textContent='اختر الصورة التي لونها أخضر.';
+ optionsEl.innerHTML='';
+ const round=rounds[current];
+ const colorOrder=['أحمر','أزرق','أخضر'];
+ // Shuffle the distractors deterministically by round while retaining one correct green image.
+ const arrangements=[
+  ['أحمر','أزرق','أخضر'],['أخضر','أحمر','أزرق'],['أزرق','أخضر','أحمر'],['أحمر','أخضر','أزرق']
+ ];
+ arrangements[current].forEach((color,index)=>{
+  const button=document.createElement('button');button.className='option';button.type='button';
+  const noun=round.names.find(n=>n.includes(color))||`${round.kind} ${color}`;
+  button.innerHTML=svgFor(round.kind,color)+`<strong>${noun}</strong>`;
+  button.addEventListener('click',()=>choose(button,color==='أخضر'));
+  optionsEl.appendChild(button);
+ });
+}
+function choose(button,isCorrect){
+ if(answered)return;
+ document.querySelectorAll('.option').forEach(b=>b.classList.remove('selected'));
+ button.classList.add('selected');
+ if(isCorrect){
+  answered=true;feedback.textContent='أحسنت! هذه هي الصورة الخضراء! 🌟';next.disabled=false;
+  speak('أحسنت! اخترت الصورة الخضراء. رائع!');
+ }else{
+  feedback.textContent='حاول مرة أخرى! ابحث عن اللون الأخضر.';
+  speak('حاول مرة أخرى. ابحث عن اللون الأخضر.');
+ }
+}
+function speak(text){
+ if(!('speechSynthesis'in window))return;
+ speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang='ar-EG';u.rate=.9;speechSynthesis.speak(u);
+}
+next.addEventListener('click',()=>{
+ if(!answered)return;
+ if(current<rounds.length-1){current++;render();speak('السؤال التالي. اختر الصورة التي لونها أخضر.');}
+ else{feedback.textContent='رائع! أكملت الأسئلة الأربعة بنجاح! 🎉';next.textContent='انتهى النشاط';next.disabled=true;speak('رائع! أكملت النشاط بنجاح.');}
+});
+document.getElementById('reset').addEventListener('click',()=>{current=0;next.textContent='السؤال التالي ←';render();speak('لنبدأ اللعب من جديد.');});
+render();
+</script>
+</body>
+</html>

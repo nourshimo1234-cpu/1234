@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لعبة المطابقة اللونية | أخضر</title>
+<style>
+:root{--green:#26a653;--deep:#14753b;--mint:#e8ffef;--yellow:#ffe16b;--ink:#243447;--pink:#ff8db2}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:"Tahoma","Arial",sans-serif;color:var(--ink);background:radial-gradient(circle at 10% 15%,#fff2b9 0 7%,transparent 7.5%),radial-gradient(circle at 90% 80%,#d8f6ff 0 10%,transparent 10.5%),linear-gradient(135deg,#e9fff0,#f4fbff 55%,#fff8e7);overflow-x:hidden}
+main{max-width:1050px;margin:auto;padding:24px 18px 34px}
+header{text-align:center;position:relative;padding:10px 10px 18px}
+.kicker{display:inline-block;background:#fff;border:2px solid #d5f4df;color:var(--deep);padding:8px 18px;border-radius:99px;font-size:14px;font-weight:bold;box-shadow:0 5px 0 #d5f4df}
+h1{font-size:clamp(30px,5vw,48px);margin:15px 0 8px;color:var(--deep);text-shadow:2px 3px 0 #c9f4d5}
+.subtitle{font-size:clamp(16px,2.4vw,20px);margin:0 auto;max-width:650px;line-height:1.8}
+.stars{font-size:25px;letter-spacing:8px;margin-top:12px}
+.panel{background:#ffffffd9;border:3px solid #fff;border-radius:28px;padding:clamp(16px,3vw,28px);box-shadow:0 12px 30px #2d80551c}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.instruction{font-size:18px;font-weight:bold;line-height:1.7}
+.pill{background:#fff5c8;border:2px solid #ffe27a;padding:9px 15px;border-radius:15px;font-weight:bold;white-space:nowrap}
+.game-layout{display:grid;grid-template-columns:1fr 250px;gap:20px;align-items:stretch}
+.cards-area{background:#f5fff7;border:2px dashed #b4e8c2;border-radius:24px;padding:16px}
+.cards-area h2{font-size:19px;margin:0 0 14px;color:#38724a}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.card{background:#fff;border:3px solid #e4f4e7;border-radius:20px;min-height:135px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;box-shadow:0 5px 0 #dcefe0;user-select:none}
+.card:hover{transform:translateY(-4px) rotate(-1deg);border-color:#81d99b;box-shadow:0 9px 0 #dcefe0}
+.card:focus-visible,.target:focus-visible,button:focus-visible{outline:4px solid #ffbf36;outline-offset:3px}
+.emoji{font-size:clamp(42px,6vw,62px);line-height:1.15;filter:drop-shadow(0 3px 1px #0000000d)}
+.card-label{font-size:14px;font-weight:bold;color:#65806b}
+.card.selected{border-color:#ffb62e;background:#fff9e7;box-shadow:0 5px 0 #ffe3a2;transform:scale(1.03)}
+.card.done{border-color:#27a854;background:#e8ffef;opacity:.8;cursor:default}
+.card.done::after{content:"✓ أحسنت!";font-size:13px;font-weight:bold;color:#16833d}
+.target-side{display:flex;flex-direction:column;gap:12px}
+.target{flex:1;min-height:230px;background:linear-gradient(160deg,#fff,#e5ffeb);border:4px dashed #52bd72;border-radius:24px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:18px;cursor:pointer;transition:.2s}
+.target.active{background:#d5ffe0;border-style:solid;transform:scale(1.02)}
+.target .big-word{font-size:clamp(32px,4vw,43px);font-weight:900;color:var(--deep);margin:10px 0}
+.target .leaf{font-size:45px}
+.target small{font-size:14px;line-height:1.7;color:#50745a}
+.message{min-height:54px;border-radius:16px;padding:12px 14px;background:#f4f7ff;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:bold;line-height:1.6}
+.message.good{background:#e5ffeb;color:#14753b}
+.message.try{background:#fff1f2;color:#a33a58}
+.controls{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:20px}
+button{border:0;border-radius:15px;padding:13px 22px;font-size:16px;font-weight:bold;cursor:pointer;transition:transform .15s,filter .15s}
+button:hover{transform:translateY(-2px);filter:brightness(1.03)}
+.primary{background:var(--green);color:#fff;box-shadow:0 5px 0 #14753b}
+.secondary{background:#fff0b9;color:#664d00;box-shadow:0 5px 0 #f3d978}
+.progress-wrap{margin-top:18px}
+.progress-info{display:flex;justify-content:space-between;font-size:14px;font-weight:bold;margin-bottom:8px}
+.progress{height:13px;border-radius:99px;background:#e3eee5;overflow:hidden}
+.bar{height:100%;width:0;background:linear-gradient(90deg,#69d889,#159746);border-radius:99px;transition:width .3s}
+.footer{text-align:center;margin-top:18px;font-size:13px;color:#64806d}
+.confetti{position:fixed;top:-30px;font-size:25px;pointer-events:none;animation:fall 1.5s ease-in forwards;z-index:5}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:0}}
+@media(max-width:700px){.game-layout{grid-template-columns:1fr}.target{min-height:190px}.cards{grid-template-columns:repeat(2,minmax(0,1fr))}.card{min-height:125px}.topline{align-items:flex-start}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+<header>
+  <span class="kicker">🌈 هيا نلعب ونتعلّم!</span>
+  <h1>مغامرة اللون الأخضر</h1>
+  <p class="subtitle">هل تستطيع اكتشاف اللون الأخضر بين ألوان مختلفة؟ اضغط على كل صورة لونها أخضر، واترك الصور ذات الألوان الأخرى!</p>
+  <div class="stars" aria-hidden="true">⭐ 🍀 ⭐</div>
+</header>
+
+<section class="panel" aria-label="نشاط المطابقة اللونية">
+  <div class="topline">
+    <div class="instruction">🧩 المهمة: اختر الصور الخضراء فقط، واترك الصور ذات الألوان الأخرى.</div>
+    <div class="pill">🏆 الصور الخضراء الصحيحة: <span id="score">٠</span> / ٦</div>
+  </div>
+  <div class="game-layout">
+    <div class="cards-area">
+      <h2>👀 ابحث عن كل ما لونه أخضر!</h2>
+      <div class="cards" id="cards" aria-label="صور أشياء خضراء"></div>
+    </div>
+    <div class="target-side">
+      <button class="target" id="target" type="button" aria-label="مطابقة الصورة مع كلمة أخضر">
+        <span class="leaf" aria-hidden="true">🍃</span>
+        <span class="big-word">أخضر</span>
+        <small>اضغط على كل صورة خضراء<br>ولا تختر الألوان الأخرى!</small>
+      </button>
+      <div class="message" id="message" role="status" aria-live="polite">🌟 اختر صورة خضراء لتبدأ اللعب!</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span>رحلتك نحو النجوم ✨</span><span id="percent">٠٪</span></div>
+    <div class="progress" aria-label="التقدم"><div class="bar" id="bar"></div></div>
+  </div>
+  <div class="controls">
+    <button class="primary" id="shuffle" type="button">🔀 رتّب الصور عشوائيًا</button>
+    <button class="secondary" id="reset" type="button">↻ ابدأ من جديد</button>
+  </div>
+</section>
+<div class="footer">💚 أنت بطل الألوان! جرّب مرة أخرى واستمتع بالتعلّم 💚</div>
+</main>
+<script>
+const items = [
+  {emoji:"🍏",name:"تفاحة خضراء",green:true},
+  {emoji:"🐸",name:"ضفدع أخضر",green:true},
+  {emoji:"🥦",name:"بروكلي أخضر",green:true},
+  {emoji:"🐢",name:"سلحفاة خضراء",green:true},
+  {emoji:"🍐",name:"كمثرى خضراء",green:true},
+  {emoji:"🍃",name:"ورقة خضراء",green:true},
+  {emoji:"🍓",name:"فراولة حمراء",green:false},
+  {emoji:"🍌",name:"موزة صفراء",green:false},
+  {emoji:"🫐",name:"توت أزرق",green:false},
+  {emoji:"🍊",name:"برتقالة برتقالية",green:false},
+  {emoji:"🍇",name:"عنب بنفسجي",green:false},
+  {emoji:"🌸",name:"زهرة وردية",green:false}
+];
+const cardsEl=document.getElementById('cards');
+const target=document.getElementById('target');
+const message=document.getElementById('message');
+const scoreEl=document.getElementById('score');
+const bar=document.getElementById('bar');
+const percent=document.getElementById('percent');
+let selected=null,matched=new Set(),order=[];
+const arabic=n=>String(n).replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+function shuffleArray(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+function render(){
+ cardsEl.innerHTML='';
+ order.forEach(item=>{
+  const b=document.createElement('button');
+  b.type='button';
+  b.className='card'+(matched.has(item.name)?' done':'')+(selected===item.name?' selected':'');
+  b.setAttribute('aria-label',item.name+(matched.has(item.name)?'، تم اختيارها':''));
+  b.disabled=matched.has(item.name);
+  b.innerHTML=`<span class="emoji" aria-hidden="true">${item.emoji}</span><span class="card-label">${item.name}</span>`;
+  b.addEventListener('click',()=>choose(item));
+  cardsEl.appendChild(b);
+ });
+ update();
+}
+function choose(item){
+ if(matched.has(item.name))return;
+ if(item.green){
+  matched.add(item.name);
+  selected=null;
+  target.classList.remove('active');
+  message.className='message good';
+  message.textContent=['🌟 أحسنت! هذا لون أخضر!','👏 رائع! لقد وجدت شيئًا أخضر!','🍀 إجابة صحيحة، واصل!'][Math.floor(Math.random()*3)];
+  if(items.filter(x=>x.green).every(x=>matched.has(x.name))){
+   message.textContent='🎉 أحسنت! لقد اخترت كل الصور الخضراء وتجنبت الألوان الأخرى!';
+   celebrate();
+  }
+ }else{
+  message.className='message try';
+  message.textContent='😊 هذا لون آخر، وليس أخضر. جرّب صورة مختلفة!';
+ }
+ render();
+}
+function update(){
+ const total=items.filter(x=>x.green).length;
+ scoreEl.textContent=arabic(matched.size);
+ const p=Math.round(matched.size/total*100);
+ bar.style.width=p+'%';percent.textContent=arabic(p)+'٪';
+}
+function celebrate(){
+ const bits=['⭐','🌟','💚','🎉','🍀','✨'];
+ for(let i=0;i<24;i++){
+  const s=document.createElement('span');s.className='confetti';s.textContent=bits[Math.floor(Math.random()*bits.length)];
+  s.style.left=Math.random()*100+'vw';s.style.animationDelay=Math.random()*.7+'s';
+  document.body.appendChild(s);setTimeout(()=>s.remove(),2400);
+ }
+}
+function resetGame(shuffle=true){
+ matched=new Set();selected=null;order=items.slice();if(shuffle)shuffleArray(order);
+ target.classList.remove('active');message.className='message';message.textContent='🌟 اختر الصور الخضراء فقط لتبدأ اللعب!';
+ render();
+}
+target.addEventListener('click',()=>{
+ message.className='message';
+ message.textContent='👆 اضغط مباشرةً على الصور التي لونها أخضر!';
+});
+document.getElementById('shuffle').addEventListener('click',()=>resetGame(true));
+document.getElementById('reset').addEventListener('click',()=>resetGame(false));
+resetGame(true);
+</script>
+</body>
+</html>
