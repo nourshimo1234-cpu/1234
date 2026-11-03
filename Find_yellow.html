@@ -1,0 +1,71 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ابحث عن اللون الأصفر</title><style>
+:root{--ink:#2d3b55;--blue:#4d91d4;--yellow:#f4c430;--green:#299b67}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:15px;display:grid;place-items:center;background:linear-gradient(135deg,#fff8d9,#fff0e9 55%,#eaf5ff);font-family:Tahoma,Arial,sans-serif;color:var(--ink)}
+main{width:min(850px,100%);background:#fff;border-radius:26px;padding:clamp(17px,3vw,28px);box-shadow:0 12px 34px #304b6820;text-align:center}
+h1{font-size:clamp(25px,4.5vw,36px);color:#987000;margin:4px 0 8px}
+p{font-size:clamp(16px,2.8vw,21px);line-height:1.8;margin:8px auto 16px}
+button{font:inherit;cursor:pointer}
+button:focus-visible{outline:4px solid #ffc94d;outline-offset:3px}
+.action{border:0;border-radius:16px;background:#d6a900;color:#fff;padding:13px 22px;min-height:49px;font-size:18px;font-weight:bold}
+.action.light{background:#edf3f8;color:#36516c}
+.feedback{min-height:55px;color:#25845b;font-weight:bold;font-size:20px;line-height:1.6;margin:12px 0}
+.small{font-size:13px;color:#718096}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;max-width:650px;margin:20px auto}
+.tile{background:#f8fbff;border:3px solid #e1ebf5;border-radius:20px;padding:12px 8px;min-height:128px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;box-shadow:0 4px 0 #e0eaf3}
+.tile .emoji{font-size:clamp(42px,8vw,64px);line-height:1.2}
+.tile .label{font-weight:bold;font-size:17px}
+.tile.selected{border-color:#e0b400;background:#fff9d9;box-shadow:0 4px 0 #f1df91}
+.tile.correct{border-color:#39a96b;background:#edfff4;box-shadow:0 4px 0 #b9e6cb}
+.tile.wrong{animation:shake .25s}
+@keyframes shake{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px 0}
+@media(max-width:520px){.grid{gap:8px}.tile{min-height:105px;padding:8px 4px}.tile .label{font-size:14px}}
+#progress{font-weight:bold;color:#987000}</style></head><body><main>
+<h1>🟡 أين اللون الأصفر؟</h1><p>انظر إلى الصور جيداً، ثم اضغط على كل شيء لونه أصفر. هيا نبحث معاً!</p>
+<div id="progress">الجولة الأولى من ٣</div><div class="grid" id="grid"></div>
+<div class="feedback" id="feedback" aria-live="polite">اختر الصور الصفراء يا بطل!</div>
+<div class="actions"><button class="action" id="next" disabled>الجولة التالية ←</button><button class="action light" id="restart">ابدأ من جديد 🔄</button></div>
+<p class="small">تظهر الصور بترتيب مختلف في كل جولة. شجّع الطفل على تسمية الأشياء بصوته.</p>
+</main><script>
+function speak(text){
+ if(!("speechSynthesis" in window))return;
+ speechSynthesis.cancel();
+ const u=new SpeechSynthesisUtterance(text);
+ u.lang="ar-EG";u.rate=.8;u.pitch=1.18;u.volume=1;
+ const voices=speechSynthesis.getVoices();
+ const ar=voices.filter(v=>/^ar([_-]|$)/i.test(v.lang));
+ const female=ar.find(v=>/female|woman|zira|sara|sahar|laila|leila|amira|mona|hoda|fatima|noura|reem|salma/i.test(v.name));
+ if(female)u.voice=female;
+ else if(ar.find(v=>/eg/i.test(v.lang)))u.voice=ar.find(v=>/eg/i.test(v.lang));
+ else if(ar[0])u.voice=ar[0];
+ speechSynthesis.speak(u);
+}
+
+const rounds=[
+ [{e:"🍌",n:"موزة",y:1},{e:"🍎",n:"تفاحة",y:0},{e:"🌞",n:"شمس",y:1},{e:"🍓",n:"فراولة",y:0},{e:"🐤",n:"كتكوت",y:1},{e:"🍐",n:"كمثرى",y:0}],
+ [{e:"🦆",n:"بطة",y:1},{e:"🚗",n:"سيارة حمراء",y:0},{e:"🌻",n:"زهرة دوار الشمس",y:1},{e:"🍇",n:"عنب",y:0},{e:"⭐",n:"نجمة",y:1},{e:"🥕",n:"جزرة",y:0}],
+ [{e:"🌽",n:"ذرة",y:1},{e:"🐸",n:"ضفدع",y:0},{e:"🎈",n:"بالون أصفر",y:1},{e:"🍉",n:"بطيخ",y:0},{e:"🧀",n:"قطعة جبن",y:1},{e:"🫐",n:"توت أزرق",y:0}]
+];
+let round=0,found=new Set();
+const grid=document.getElementById("grid"),feedback=document.getElementById("feedback"),next=document.getElementById("next");
+function shuffle(a){return [...a].sort(()=>Math.random()-.5)}
+function render(){
+ found.clear();next.disabled=true;grid.innerHTML="";
+ document.getElementById("progress").textContent="الجولة "+["الأولى","الثانية","الثالثة"][round]+" من ٣";
+ shuffle(rounds[round]).forEach((item,i)=>{
+  const b=document.createElement("button");b.className="tile";b.innerHTML='<span class="emoji">'+item.e+'</span><span class="label">'+item.n+'</span>';
+  b.addEventListener("click",()=>{
+   if(b.classList.contains("correct"))return;
+   if(item.y){b.classList.add("correct");found.add(b);feedback.textContent="أحسنت! "+item.n+" لونه أصفر. ⭐";speak("أحسنت! "+item.n+" لونه أصفر.");}
+   else{b.classList.add("wrong");feedback.textContent="هذه ليست صفراء. حاول مرة أخرى.";speak("حاول مرة أخرى. ابحث عن اللون الأصفر.");setTimeout(()=>b.classList.remove("wrong"),400);}
+   const total=rounds[round].filter(x=>x.y).length;
+   if(found.size===total){feedback.textContent="رائع! وجدت كل الأشياء الصفراء! 🎉";speak("رائع! وجدت كل الأشياء الصفراء. أنت بطل!");next.disabled=false;}
+  });grid.appendChild(b);
+ });
+ feedback.textContent="ابحث عن الصور الصفراء!";
+}
+next.addEventListener("click",()=>{if(round<2){round++;render();}else{feedback.textContent="أكملت الجولات الثلاث بنجاح! أحسنت يا بطل! 🏆";speak("أكملت كل الجولات. أحسنت يا بطل!");next.disabled=true;}});
+document.getElementById("restart").addEventListener("click",()=>{round=0;render();});
+render();
+</script></body></html>
