@@ -1,0 +1,27 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>اللعبة ٢: ابحث عن البارد</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7fc;color:#26344b;font-family:Tahoma,Arial,sans-serif;text-align:center;line-height:1.65}
+header{padding:18px 12px;background:#e8f3ff;border-bottom:4px solid #cfe3f5}h1{font-size:clamp(1.35rem,5vw,2rem);margin:0}header p{margin:4px 0}
+main{max-width:740px;margin:18px auto;padding:0 12px 28px}.card{background:white;border-radius:24px;padding:clamp(16px,4vw,26px);box-shadow:0 6px 22px #1e3b5b12}
+.prompt{font-size:clamp(1.2rem,4vw,1.65rem);font-weight:bold;margin:8px 0 14px}.hero{font-size:clamp(4rem,17vw,7rem);line-height:1.25;margin:10px}
+.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.choice{background:#fff9e9;border:3px solid #f0dfba;border-radius:20px;min-height:145px;padding:12px 6px;font:inherit;cursor:pointer;color:#26344b}
+.choice .emoji{display:block;font-size:clamp(3rem,12vw,5rem)}.choice .label{font-size:1.05rem;font-weight:bold}
+button:focus-visible{outline:4px solid #438bd0;outline-offset:3px}
+.action{border:0;border-radius:15px;padding:12px 20px;margin:5px;background:#3979b8;color:white;font:inherit;font-weight:bold;cursor:pointer}
+.sound{background:#7256a8}.next:disabled{opacity:.4;cursor:not-allowed}
+.feedback{min-height:54px;font-size:1.12rem;font-weight:bold;margin:10px 0}.good{color:#208354}.try{color:#ad681b}
+.progress{height:11px;background:#e8edf4;border-radius:20px;overflow:hidden;margin:14px 0 7px}.bar{height:100%;width:0;background:#61b98b;transition:width .2s}
+.note{font-size:.9rem;color:#63738a;margin-top:12px}
+@media(max-width:420px){.choices{gap:8px}.choice{min-height:125px}}
+</style></head>
+<body><header><h1>اللعبة ٢: ابحث عن البارد</h1><p>ساعد البطريق في اختيار الأشياء الباردة</p></header><main><section class="card"><div class="prompt" id="prompt">اضغط على الشيء البارد</div><div class="hero">🐧</div><div class="choices" id="choices"></div>
+<button class="action sound" onclick="repeat()">🔊 اسمع</button><div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="progress"><div class="bar" id="bar"></div></div><div id="count">١ من ٥</div><button class="action next" id="next" onclick="advance()" disabled>التالي ←</button></section><p class="note">اضغط «اسمع» لسماع التعليمات مرة أخرى. يمكنك اللعب بمساعدة أحد أفراد الأسرة عند الحاجة.</p></main><script>const rounds=[['🧊','ثلج',1,'🔥','نار',0],['🍦','آيس كريم',1,'🍵','شاي ساخن',0],['❄️','ثلج',1,'☀️','شمس',0],['🥤','عصير بارد',1,'🍲','حساء ساخن',0],['🧃','عصير بارد',1,'🕯️','شمعة',0]];
+let i=0,done=false;
+function say(t){if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar';u.rate=.82;speechSynthesis.speak(u)}}
+function repeat(){say('اضغط على الشيء البارد.')}
+function render(){let r=rounds[i];document.getElementById('choices').innerHTML=[r.slice(0,3),r.slice(3,6)].map((x,j)=>`<button class="choice" onclick="pick(${j})"><span class="emoji">${x[0]}</span><span class="label">${x[1]}</span></button>`).join('');document.getElementById('feedback').textContent='';document.getElementById('next').disabled=true;document.getElementById('count').textContent=(i+1)+' من ٥';document.getElementById('bar').style.width=(i/5*100)+'%';done=false;}
+function pick(j){if(done)return;let r=rounds[i],correct=(j===0?r[2]:r[5]);if(correct){done=true;document.getElementById('feedback').textContent='نعم! هذا بارد. أحسنت ⭐';document.getElementById('feedback').className='feedback good';document.getElementById('next').disabled=false;say('أحسنت! هذا بارد.');}else{document.getElementById('feedback').textContent='هذا ساخن. ابحث عن الشيء البارد.';document.getElementById('feedback').className='feedback try';say('هذا ساخن. ابحث عن البارد.');}}
+function advance(){i++;if(i===rounds.length){finish();return;}render();repeat();}
+function finish(){document.querySelector('.card').innerHTML='<div class="hero">🐧❄️</div><div class="prompt">وجدت كل الأشياء الباردة!</div><div class="feedback good">أحسنت يا بطل ⭐⭐⭐</div><button class="action" onclick="location.reload()">العب مرة أخرى</button>';say('أحسنت! وجدت كل الأشياء الباردة.');}
+render();setTimeout(repeat,500);</script></body></html>
