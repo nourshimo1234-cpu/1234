@@ -1,0 +1,32 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>النشاط ٣: أين باب البرج؟</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f3f7ff;color:#26344b;font-family:Tahoma,Arial,sans-serif;text-align:center;line-height:1.65}
+header{padding:18px 12px;background:#e9f3ff;border-bottom:4px solid #cfe3f5}h1{font-size:clamp(1.35rem,5vw,2rem);margin:0}header p{margin:4px 0}
+main{max-width:760px;margin:18px auto;padding:0 12px 28px}.card{background:#fff;border-radius:24px;padding:clamp(15px,4vw,25px);box-shadow:0 6px 22px #1e3b5b12}
+.prompt{font-size:clamp(1.15rem,4vw,1.5rem);font-weight:bold;margin:8px 0 14px}
+.scene{background:#f7fbff;border:2px dashed #c8d9eb;border-radius:20px;padding:12px;margin:12px auto;max-width:440px}
+svg{width:100%;max-height:310px;display:block;margin:auto}.choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:16px 0}
+.choice{background:#fff9e9;border:3px solid #f0dfba;border-radius:20px;min-height:125px;padding:10px;cursor:pointer;color:#26344b;font:inherit}
+.choice svg{height:90px}.choice .emoji{display:block;font-size:3.8rem}.choice .label{font-size:1rem;font-weight:bold}
+.action{border:0;border-radius:15px;padding:12px 20px;margin:5px;background:#3979b8;color:white;font:inherit;font-weight:bold;cursor:pointer}
+.sound{background:#7256a8}.next:disabled{opacity:.4;cursor:not-allowed}
+.feedback{min-height:52px;font-size:1.1rem;font-weight:bold;margin:10px 0}.good{color:#208354}.try{color:#ad681b}
+.progress{height:11px;background:#e8edf4;border-radius:20px;overflow:hidden;margin:14px 0 7px}.bar{height:100%;width:0;background:#61b98b;transition:width .2s}
+.note{font-size:.9rem;color:#63738a;margin-top:12px}
+@media(max-width:420px){.choices{gap:8px}.choice{min-height:112px}}
+</style></head><body>
+<header><h1>النشاط ٣: أين باب البرج؟</h1><p>اربط الجزء الناقص بالمكان الصحيح</p></header><main><section class="card"><div class="prompt" id="prompt">البرج يحتاج إلى باب. اختر الباب الصحيح.</div><div class="scene" id="scene"><svg viewBox="0 0 400 370" role="img" aria-label="برج ناقص">
+    <path d="M45 340H355" stroke="#7bbd83" stroke-width="8" stroke-linecap="round"/>
+    <rect x="105" y="95" width="190" height="245" rx="12" fill="#83c5e8" stroke="#3979b8" stroke-width="6"/>
+    <polygon points="105,95 200,25 295,95" fill="#f2a541" stroke="#8c5b2c" stroke-width="5"/><rect x="185" y="8" width="30" height="22" rx="4" fill="#e86f62"/><rect x="145" y="145" width="42" height="48" rx="7" fill="#fff3a6" stroke="#3979b8" stroke-width="5"/><path d="M166 145v48 M145 169h42" stroke="#3979b8" stroke-width="4"/><path d="M200 25V0" stroke="#76543a" stroke-width="6"/><path d="M203 2h55l-15 18h-40z" fill="#ef6b65"/>
+    <rect x="220" y="145" width="42" height="48" rx="7" fill="#fff3a6" stroke="#3979b8" stroke-width="5"/>
+    <path d="M241 145v48 M220 169h42" stroke="#3979b8" stroke-width="4"/>
+    <circle cx="200" cy="225" r="8" fill="#fff3a6"/>
+    </svg></div>
+<div class="choices" id="choices"></div><button class="action sound" onclick="repeat()">🔊 اسمع</button>
+<div class="feedback" id="feedback" aria-live="polite"></div><button class="action next" id="next" onclick="finish()" disabled>أكمل الصورة ←</button></section><p class="note">يمكنك الضغط على «اسمع» لإعادة التعليمات. خذ وقتك وفكّر بهدوء.</p></main><script>function say(t){if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar';u.rate=.82;speechSynthesis.speak(u)}}function repeat(){say('انظر إلى أسفل البرج. الباب ناقص. اختر صورة الباب.');}
+const door=`<svg viewBox="0 0 130 110"><path d="M30 105V42a35 35 0 0 1 70 0v63z" fill="#a96d45" stroke="#75452e" stroke-width="6"/><circle cx="85" cy="72" r="5" fill="#ffe28a"/></svg>`;
+const window=`<svg viewBox="0 0 130 110"><rect x="20" y="15" width="90" height="80" rx="8" fill="#fff3a6" stroke="#3979b8" stroke-width="6"/><path d="M65 15v80M20 55h90" stroke="#3979b8" stroke-width="5"/></svg>`;
+document.getElementById('choices').innerHTML=`<button class="choice" onclick="pick(1)">${door}<span class="label">باب</span></button><button class="choice" onclick="pick(0)">${window}<span class="label">نافذة</span></button>`;
+let done=false;function pick(ok){if(done)return;let f=document.getElementById('feedback');if(ok){done=true;f.textContent='صحيح! الباب مكانه أسفل البرج ⭐';f.className='feedback good';document.getElementById('next').disabled=false;say('صحيح! أحسنت.');}else{f.textContent='فكر: من أين ندخل إلى البرج؟';f.className='feedback try';say('حاول مرة أخرى.');}}
+function finish(){document.getElementById('scene').innerHTML=`<svg viewBox="0 0 400 370"><path d="M45 340H355" stroke="#7bbd83" stroke-width="8" stroke-linecap="round"/><rect x="105" y="95" width="190" height="245" rx="12" fill="#83c5e8" stroke="#3979b8" stroke-width="6"/><polygon points="105,95 200,25 295,95" fill="#f2a541" stroke="#8c5b2c" stroke-width="5"/><rect x="185" y="8" width="30" height="22" rx="4" fill="#e86f62"/><rect x="145" y="145" width="42" height="48" rx="7" fill="#fff3a6" stroke="#3979b8" stroke-width="5"/><path d="M166 145v48 M145 169h42" stroke="#3979b8" stroke-width="4"/><rect x="220" y="145" width="42" height="48" rx="7" fill="#fff3a6" stroke="#3979b8" stroke-width="5"/><path d="M241 145v48 M220 169h42" stroke="#3979b8" stroke-width="4"/><rect x="180" y="260" width="42" height="75" rx="20" fill="#a96d45" stroke="#75452e" stroke-width="5"/><path d="M200 25V0" stroke="#76543a" stroke-width="6"/><path d="M203 2h55l-15 18h-40z" fill="#ef6b65"/></svg>`;document.getElementById('prompt').textContent='رائع! اكتملت صورة البرج!';document.getElementById('feedback').textContent='أحسنت يا بطل ⭐⭐⭐';document.getElementById('feedback').className='feedback good';document.getElementById('next').textContent='العب مرة أخرى';document.getElementById('next').onclick=()=>location.reload();say('رائع! أكملت صورة البرج.');}
+setTimeout(repeat,500);</script></body></html>

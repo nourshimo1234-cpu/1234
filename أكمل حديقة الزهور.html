@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أكمل حديقة الزهور</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f1f8ff;color:#29384d;font-family:Tahoma,Arial;text-align:center;line-height:1.6}
+header{background:#e5f2ff;padding:16px}h1{margin:0;font-size:clamp(22px,5vw,32px)}
+main{max-width:760px;margin:16px auto;padding:0 12px}.card{background:white;border-radius:22px;padding:16px;box-shadow:0 5px 20px #2345}
+.instruction{font-size:clamp(18px,4vw,24px);font-weight:bold}.hint{color:#68778a;margin:4px 0 12px}
+#board{width:100%;max-width:650px;background:#f8fcff;border:2px dashed #cbddeb;border-radius:18px;touch-action:none}
+.tray{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:14px 0}
+.piece{width:95px;height:92px;background:#fff9e8;border:3px solid #eadbb5;border-radius:17px;display:grid;place-items:center;touch-action:none;cursor:grab}
+.piece svg{width:75px;height:75px;pointer-events:none}.piece.used{opacity:.25;pointer-events:none}
+button{border:0;border-radius:13px;padding:11px 18px;margin:5px;background:#3979b8;color:white;font:bold 16px Tahoma;cursor:pointer}
+#feedback{min-height:48px;font-weight:bold;font-size:18px;margin:8px}.good{color:#218451}.retry{color:#ad681b}
+.bar{height:10px;background:#e9edf3;border-radius:10px;overflow:hidden}.bar span{display:block;height:100%;width:0;background:#65b98c}
+@media(max-width:420px){.piece{width:76px;height:78px}.piece svg{width:62px;height:62px}}
+</style></head>
+<body>
+<header><h1>🌷 أكمل حديقة الزهور 🌷</h1><div>نشاط سحب وإفلات للأطفال من ٤ إلى ٦ سنوات</div></header>
+<main><section class="card">
+<div class="instruction">ساعد الزهرة لتصبح جميلة!</div>
+<p class="hint">اسحب كل قطعة من الأسفل وضعها في مكانها المناسب داخل الصورة.</p>
+<svg id="board" viewBox="0 0 600 390" aria-label="زهرة بها أجزاء ناقصة">
+<rect width="600" height="390" rx="16" fill="#f4fbff"/>
+<circle cx="520" cy="55" r="28" fill="#ffdc70"/>
+<path d="M0 310 Q150 270 300 310 T600 300V390H0Z" fill="#9ed28e"/>
+<path d="M300 190 Q295 260 300 340" stroke="#3b9b61" stroke-width="14" fill="none" stroke-linecap="round"/>
+<path d="M298 280 Q235 240 200 275 Q235 315 298 295Z" fill="#64bd76" stroke="#338b53" stroke-width="4"/>
+<!-- أماكن الأجزاء الناقصة -->
+<ellipse class="slot" data-slot="petalA" cx="235" cy="130" rx="39" ry="53" transform="rotate(-48 235 130)"/>
+<ellipse class="slot" data-slot="petalB" cx="365" cy="130" rx="39" ry="53" transform="rotate(48 365 130)"/>
+<circle class="slot" data-slot="center" cx="300" cy="190" r="35"/>
+<path class="slot" data-slot="leaf" d="M302 300 Q365 255 400 285 Q365 325 302 300Z"/>
+<!-- أجزاء موجودة بالفعل -->
+<ellipse cx="300" cy="105" rx="39" ry="53" fill="#f58bb5" stroke="#d95d91" stroke-width="4"/>
+<ellipse cx="300" cy="275" rx="39" ry="53" fill="#f58bb5" stroke="#d95d91" stroke-width="4"/>
+<text x="300" y="370" text-anchor="middle" font-size="17" fill="#326b43" font-weight="bold">أكمل الزهرة الجميلة</text>
+</svg>
+<div style="font-weight:bold;margin-top:12px">قطع الزهرة: اسحب كل قطعة إلى مكانها</div>
+<div class="tray" id="tray">
+<div class="piece" data-piece="petalA" aria-label="بتلة"><svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="28" ry="42" transform="rotate(-48 50 50)" fill="#f58bb5" stroke="#d95d91" stroke-width="5"/></svg></div>
+<div class="piece" data-piece="petalB" aria-label="بتلة"><svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="28" ry="42" transform="rotate(48 50 50)" fill="#f58bb5" stroke="#d95d91" stroke-width="5"/></svg></div>
+<div class="piece" data-piece="center" aria-label="قلب الزهرة"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="31" fill="#ffd45c" stroke="#e3a92c" stroke-width="5"/></svg></div>
+<div class="piece" data-piece="leaf" aria-label="ورقة"><svg viewBox="0 0 100 100"><path d="M12 60Q42 5 90 35Q70 90 12 60Z" fill="#64bd76" stroke="#338b53" stroke-width="5"/></svg></div>
+</div>
+<div class="bar"><span id="progress"></span></div>
+<div id="count">أكملت ٠ من ٤ أجزاء</div>
+<div id="feedback" aria-live="polite">ابدأ بسحب قطعة إلى مكانها.</div>
+<button id="listen">🔊 اسمع التعليمات</button><button id="reset">إعادة النشاط ↻</button>
+</section></main>
+<script>
+const board=document.getElementById('board'),feedback=document.getElementById('feedback');
+const targets={petalA:[235,130],petalB:[365,130],center:[300,190],leaf:[350,290]};
+let active=null,ghost=null,done=new Set();
+function speak(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar';u.rate=.82;speechSynthesis.speak(u)}
+function instructions(){speak('اسحب قطع الزهرة من الأسفل وضع كل قطعة في مكانها المناسب.')}
+function coords(e){let pt=board.createSVGPoint();pt.x=e.clientX;pt.y=e.clientY;return pt.matrixTransform(board.getScreenCTM().inverse())}
+function shape(k,x,y){
+ let el,ns='http://www.w3.org/2000/svg';
+ if(k.startsWith('petal')){el=document.createElementNS(ns,'ellipse');el.setAttribute('cx',x);el.setAttribute('cy',y);el.setAttribute('rx',39);el.setAttribute('ry',53);el.setAttribute('transform',k==='petalA'?`rotate(-48 ${x} ${y})`:`rotate(48 ${x} ${y})`);el.setAttribute('fill','#f58bb5');el.setAttribute('stroke','#d95d91');el.setAttribute('stroke-width',4)}
+ else if(k==='center'){el=document.createElementNS(ns,'circle');el.setAttribute('cx',x);el.setAttribute('cy',y);el.setAttribute('r',35);el.setAttribute('fill','#ffd45c');el.setAttribute('stroke','#e3a92c');el.setAttribute('stroke-width',5)}
+ else{el=document.createElementNS(ns,'path');el.setAttribute('d',`M${x-48} ${y} Q${x-10} ${y-40} ${x+48} ${y-8} Q${x+5} ${y+35} ${x-48} ${y}Z`);el.setAttribute('fill','#64bd76');el.setAttribute('stroke','#338b53');el.setAttribute('stroke-width',5)}
+ return el;
+}
+function start(e){let el=e.currentTarget,k=el.dataset.piece;if(done.has(k))return;e.preventDefault();el.setPointerCapture(e.pointerId);active={k,id:e.pointerId,el};let q=coords(e);ghost=shape(k,q.x,q.y);board.appendChild(ghost)}
+function move(e){if(!active||e.pointerId!==active.id)return;let q=coords(e),k=active.k;if(k.startsWith('petal')){ghost.setAttribute('cx',q.x);ghost.setAttribute('cy',q.y);ghost.setAttribute('transform',k==='petalA'?`rotate(-48 ${q.x} ${q.y})`:`rotate(48 ${q.x} ${q.y})`)}else if(k==='center'){ghost.setAttribute('cx',q.x);ghost.setAttribute('cy',q.y)}else{ghost.setAttribute('d',`M${q.x-48} ${q.y} Q${q.x-10} ${q.y-40} ${q.x+48} ${q.y-8} Q${q.x+5} ${q.y+35} ${q.x-48} ${q.y}Z`)}}
+function end(e){if(!active||e.pointerId!==active.id)return;let q=coords(e),k=active.k,t=targets[k];if(Math.hypot(q.x-t[0],q.y-t[1])<75){ghost.remove();board.appendChild(shape(k,t[0],t[1]));done.add(k);active.el.classList.add('used');feedback.textContent='أحسنت! وضعت القطعة في مكانها ⭐';feedback.className='good';speak('أحسنت! قطعة في مكانها الصحيح.');document.getElementById('count').textContent=`أكملت ${done.size} من ٤ أجزاء`;document.getElementById('progress').style.width=(done.size*25)+'%';if(done.size===4){feedback.textContent='رائع! أصبحت الزهرة كاملة وجميلة! 🌷⭐⭐⭐';speak('رائع! أكملت الزهرة. أنت بطل!')}}
+ else{ghost.remove();feedback.textContent='حاول مرة أخرى. قرّب القطعة من مكانها المناسب.';feedback.className='retry';speak('حاول مرة أخرى، أنت تستطيع.')}active=null;ghost=null}
+document.querySelectorAll('.piece').forEach(el=>{el.addEventListener('pointerdown',start);el.addEventListener('pointermove',move);el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end)});
+document.getElementById('listen').onclick=instructions;document.getElementById('reset').onclick=()=>location.reload();setTimeout(instructions,500);
+</script></body></html>
