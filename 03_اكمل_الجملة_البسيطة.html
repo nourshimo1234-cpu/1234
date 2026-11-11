@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>أكمل الجملة البسيطة</title><style>
+*{box-sizing:border-box}body{margin:0;background:#f2f8ff;color:#29384d;font-family:Tahoma,Arial,sans-serif;text-align:center;line-height:1.65}
+header{background:#e4f1ff;padding:16px 10px;border-bottom:4px solid #cde3f8}h1{margin:0;font-size:clamp(22px,5vw,31px)}header p{margin:4px 0}
+main{max-width:760px;margin:16px auto;padding:0 12px 28px}.card{background:white;border-radius:22px;padding:clamp(14px,3vw,22px);box-shadow:0 5px 20px #23451a12}
+.instruction{font-size:clamp(19px,4vw,25px);font-weight:bold;margin:5px 0}.hint{color:#68778a;margin:4px 0 14px}
+.choices{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:18px 0}
+.choice{min-width:125px;min-height:118px;padding:12px;background:#fff9e8;border:3px solid #eadbb5;border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;font:inherit;font-weight:bold;color:#29384d}
+.pic{font-size:55px;line-height:1.2}.word{font-size:26px;color:#3979b8}.choice:focus{outline:4px solid #8cc5f2}
+button{border:0;border-radius:13px;padding:11px 18px;margin:5px;background:#3979b8;color:white;font:bold 16px Tahoma;cursor:pointer}
+button.secondary{background:#7256a8}.feedback{min-height:52px;margin:12px 0 4px;font-weight:bold;font-size:18px}.good{color:#218451}.retry{color:#ad681b}
+.progress{height:10px;background:#e9edf3;border-radius:10px;overflow:hidden;margin:12px 0}.progress span{display:block;height:100%;width:0;background:#65b98c;transition:width .2s}
+.bigpic{font-size:clamp(75px,18vw,115px);background:#eef7ff;border-radius:22px;max-width:220px;margin:12px auto;padding:5px}
+.sentence{font-size:clamp(23px,5vw,32px);font-weight:bold;background:#f1f8ff;border-radius:18px;padding:18px;margin:14px 0}
+.small{font-size:14px;color:#738096}.choice:disabled{opacity:.55;cursor:default}
+@media(max-width:420px){.choice{min-width:105px;min-height:104px}.pic{font-size:46px}.word{font-size:23px}}
+</style></head><body><header><h1>أكمل الجملة البسيطة</h1><p>تدريب الطفل على استخدام المفردات الجديدة في جمل قصيرة</p></header><main><section class="card"><div class="instruction">هيا نكمل الجملة! 🗣️</div><p class="hint">شاهد الصورة، واستمع إلى الجملة، ثم اختر الكلمة الناقصة.</p>
+<div class="bigpic" id="pic">🍎</div><button id="hear">🔊 استمع إلى الجملة</button><div class="sentence" id="sentence">أنا أكلُ ____.</div>
+<div class="choices" id="opts"></div><div class="progress"><span id="bar"></span></div><div id="count">الجملة ١ من ٦</div>
+<div class="feedback" id="fb">اختر الكلمة التي تكمل الجملة.</div><button class="secondary" id="again">إعادة النشاط ↻</button></section></main><script>
+const qs=[
+ {e:'🍎',before:'أنا آكلُ',after:'.',ok:'تفاحة',no:'سيارة',full:'أنا آكل تفاحة.'},
+ {e:'🐱',before:'هذه',after:'جميلة.',ok:'قطة',no:'كتاب',full:'هذه قطة جميلة.'},
+ {e:'☀️',before:'الشمسُ',after:'في السماء.',ok:'مضيئة',no:'تأكل',full:'الشمس مضيئة في السماء.'},
+ {e:'📘',before:'أنا أقرأُ',after:'.',ok:'كتابًا',no:'كرة',full:'أنا أقرأ كتابًا.'},
+ {e:'⚽',before:'ألعبُ بـ',after:'.',ok:'الكرة',no:'التفاحة',full:'ألعب بالكرة.'},
+ {e:'🚗',before:'السيارةُ',after:'على الطريق.',ok:'تسير',no:'تنام',full:'السيارة تسير على الطريق.'}
+];let i=0,lock=false;const $=x=>document.getElementById(x);
+function say(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar';u.rate=.78;speechSynthesis.speak(u)}
+function render(){lock=false;let q=qs[i];$('pic').textContent=q.e;$('sentence').textContent=q.before+' ____ '+q.after;$('opts').innerHTML='';[q.ok,q.no].sort(()=>i%2?1:-1).forEach(w=>{let x=document.createElement('button');x.className='choice';x.innerHTML=`<span class="word">${w}</span>`;x.onclick=()=>answer(w);$('opts').appendChild(x)});$('count').textContent=`الجملة ${'٠١٢٣٤٥٦'[i+1]} من ٦`;$('bar').style.width=i/6*100+'%';$('fb').textContent='اختر الكلمة المناسبة.'}
+function answer(w){if(lock)return;if(w===qs[i].ok){lock=true;$('sentence').textContent=qs[i].full;$('fb').textContent='رائع! أكملت الجملة بشكل صحيح ⭐';$('fb').className='feedback good';say(qs[i].full);setTimeout(()=>{i++;i<qs.length?render():finish()},1700)}else{$('fb').textContent='فكر في معنى الجملة والصورة، ثم حاول.';$('fb').className='feedback retry';say('حاول مرة أخرى')}}
+function finish(){$('opts').textContent='🌟';$('bar').style.width='100%';$('count').textContent='اكتمل النشاط';$('fb').textContent='أحسنت! استخدمت كلمات جديدة في جمل بسيطة.';$('fb').className='feedback good';say('أحسنت!')}
+$('hear').onclick=()=>say(qs[i].full);$('again').onclick=()=>{i=0;render()};render();
+</script></body></html>
