@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اسمع واختر الصورة</title>
+<style>
+body{font-family:Tahoma;background:#f2edff;text-align:center;padding:15px}
+.card{max-width:650px;margin:20px auto;background:white;border-radius:25px;padding:25px;box-shadow:0 5px 15px #0002}
+h1{color:#7655bd;font-size:30px}
+button{cursor:pointer;border:0;border-radius:20px;padding:15px;margin:10px}
+.sound{background:#8063cf;color:white;font-size:24px}
+.options{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin:20px}
+.option{background:#eee8ff;border:3px solid #d3c6ff;min-width:120px;font-size:22px}
+.pic{display:block;font-size:65px;margin:8px}
+#feedback{font-size:23px;min-height:40px;font-weight:bold}
+.good{color:green}.bad{color:#dc7655}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🔊 اسمع واختر الصورة</h1>
+<p style="font-size:21px">اضغط على السماعة، واستمع إلى الكلمة، ثم اختر صورتها.</p>
+<button class="sound" onclick="listen()">🔊 استمع للكلمة</button>
+<div class="options" id="options"></div>
+<div id="feedback"></div>
+<p id="count"></p>
+<button class="sound" id="next" onclick="next()" hidden>التالي ➡️</button>
+</div>
+
+<script>
+const data=[
+{word:"باب",pic:"🚪",choices:[["🚪","باب"],["🍎","تفاحة"],["🐟","سمكة"]]},
+{word:"موز",pic:"🍌",choices:[["🌹","وردة"],["🍌","موز"],["🚗","سيارة"]]},
+{word:"سمكة",pic:"🐟",choices:[["🐟","سمكة"],["☀️","شمس"],["📚","كتاب"]]},
+{word:"تفاحة",pic:"🍎",choices:[["🏠","بيت"],["🍎","تفاحة"],["🧸","دبدوب"]]},
+{word:"شمس",pic:"☀️",choices:[["🌙","قمر"],["☀️","شمس"],["🍇","عنب"]]}
+];
+let i=0,done=false;
+
+function listen(){
+let speech=new SpeechSynthesisUtterance(data[i].word);
+speech.lang="ar-SA";
+speech.rate=.75;
+speechSynthesis.cancel();
+speechSynthesis.speak(speech);
+}
+
+function display(){
+done=false;
+document.getElementById("feedback").textContent="";
+document.getElementById("next").hidden=true;
+document.getElementById("count").textContent="السؤال "+(i+1)+" من "+data.length;
+let choices=[...data[i].choices].sort(()=>Math.random()-.5);
+document.getElementById("options").innerHTML="";
+choices.forEach(item=>{
+let b=document.createElement("button");
+b.className="option";
+b.innerHTML="<span class='pic'>"+item[0]+"</span>"+item[1];
+b.onclick=()=>answer(item[1]);
+document.getElementById("options").appendChild(b);
+});
+}
+
+function answer(word){
+if(done)return;
+done=true;
+let f=document.getElementById("feedback");
+if(word===data[i].word){
+f.textContent="👏 ممتاز! لقد اخترت الصورة الصحيحة.";
+f.className="good";
+}else{
+f.textContent="🌷 محاولة جميلة! استمع مرة أخرى في المرة القادمة.";
+f.className="bad";
+}
+document.getElementById("next").hidden=false;
+}
+
+function next(){
+i++;
+if(i>=data.length){
+document.querySelector(".card").innerHTML=
+"<h1>🌟 أحسنت يا بطل!</h1><div style='font-size:80px'>🎉👏🎉</div><p>لقد استمعت واخترت الصور بنجاح.</p><button class='sound' onclick='location.reload()'>إعادة اللعب</button>";
+}else display();
+}
+display();
+</script>
+</body>
+</html>

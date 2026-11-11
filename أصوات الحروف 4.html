@@ -1,0 +1,167 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اسحب الحرف إلى الصورة</title>
+<style>
+body{font-family:Tahoma;background:#e9fff4;text-align:center;padding:15px}
+.card{max-width:750px;margin:20px auto;background:white;border-radius:25px;padding:25px;box-shadow:0 5px 15px #0002}
+h1{color:#16966c;font-size:30px}
+p{font-size:21px}
+.letters,.pictures{display:flex;justify-content:center;gap:15px;flex-wrap:wrap;margin:25px 0}
+.letter{font-size:48px;background:#dff1ff;color:#2466a0;border:3px solid #9dcdf0;border-radius:18px;padding:12px 25px;cursor:grab;touch-action:none}
+.target{width:145px;min-height:155px;border:3px dashed #9ed8bb;border-radius:20px;background:#f1fff7;padding:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+.pic{font-size:60px}
+.word{font-size:20px}
+.drop{font-size:30px;color:#159568;font-weight:bold}
+.selected{background:#ffe9a8;border-color:#e4a92e}
+.correct{background:#d9ffeb;border:3px solid #159568}
+#feedback{font-size:23px;min-height:40px;font-weight:bold;color:#159568}
+button{font-size:22px;border:0;border-radius:18px;padding:13px 25px;background:#20a878;color:white;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🧲 اسحب الحرف إلى الصورة</h1>
+<p>اسحب كل حرف إلى الصورة التي يبدأ اسمها بهذا الحرف.</p>
+
+<h2>الحروف</h2>
+<div class="letters" id="letters"></div>
+
+<h2>الصور</h2>
+<div class="pictures" id="pictures"></div>
+
+<div id="feedback"></div>
+<p id="count"></p>
+<button id="next" onclick="next()" hidden>المجموعة التالية ➡️</button>
+</div>
+
+<script>
+const groups=[
+{
+letters:["م","س","ب"],
+items:[
+{pic:"🍌",word:"موز",letter:"م"},
+{pic:"🐟",word:"سمكة",letter:"س"},
+{pic:"🚪",word:"باب",letter:"ب"}
+]
+},
+{
+letters:["ت","و","ش"],
+items:[
+{pic:"🍎",word:"تفاحة",letter:"ت"},
+{pic:"🌹",word:"وردة",letter:"و"},
+{pic:"☀️",word:"شمس",letter:"ش"}
+]
+}
+];
+
+let group=0;
+let selected=null;
+let completed=[];
+
+function setup(){
+selected=null;
+completed=[];
+document.getElementById("feedback").textContent="";
+document.getElementById("next").hidden=true;
+document.getElementById("count").textContent=
+"المجموعة "+(group+1)+" من "+groups.length;
+
+let letters=[...groups[group].letters].sort(()=>Math.random()-.5);
+document.getElementById("letters").innerHTML="";
+
+letters.forEach(letter=>{
+let el=document.createElement("div");
+el.className="letter";
+el.textContent=letter;
+el.draggable=true;
+el.dataset.letter=letter;
+
+el.addEventListener("dragstart",e=>{
+e.dataTransfer.setData("text/plain",letter);
+});
+
+el.addEventListener("click",()=>{
+selected=letter;
+document.querySelectorAll(".letter").forEach(x=>x.classList.remove("selected"));
+el.classList.add("selected");
+document.getElementById("feedback").textContent=
+"رائع! اختر الآن الصورة المناسبة للحرف "+letter;
+});
+
+document.getElementById("letters").appendChild(el);
+});
+
+document.getElementById("pictures").innerHTML="";
+
+groups[group].items.forEach(item=>{
+let box=document.createElement("div");
+box.className="target";
+box.dataset.answer=item.letter;
+
+box.innerHTML=
+"<span class='pic'>"+item.pic+"</span>"+
+"<span class='word'>"+item.word+"</span>"+
+"<span class='drop'>ضع الحرف هنا</span>";
+
+box.addEventListener("dragover",e=>e.preventDefault());
+
+box.addEventListener("drop",e=>{
+e.preventDefault();
+let letter=e.dataTransfer.getData("text/plain");
+check(letter,box);
+});
+
+box.addEventListener("click",()=>{
+if(selected)check(selected,box);
+});
+
+document.getElementById("pictures").appendChild(box);
+});
+}
+
+function check(letter,box){
+if(completed.includes(box.dataset.answer))return;
+
+if(letter===box.dataset.answer){
+completed.push(letter);
+box.classList.add("correct");
+box.querySelector(".drop").textContent="✓ "+letter;
+
+document.getElementById("feedback").textContent=
+"🌟 أحسنت! وضعت الحرف في مكانه الصحيح.";
+
+selected=null;
+document.querySelectorAll(".letter").forEach(x=>x.classList.remove("selected"));
+
+if(completed.length===3){
+document.getElementById("feedback").textContent=
+"🏆 رائع! أكملت جميع الصور بنجاح.";
+document.getElementById("next").hidden=false;
+}
+}else{
+document.getElementById("feedback").textContent=
+"👏 حاول مرة أخرى، انظر إلى الصورة واسمها.";
+}
+}
+
+function next(){
+group++;
+if(group>=groups.length){
+document.querySelector(".card").innerHTML=
+"<h1>🎉 بطل الحروف!</h1>"+
+"<div style='font-size:85px'>🏆🌟👏</div>"+
+"<p>لقد نجحت في توصيل جميع الحروف بالصور.</p>"+
+"<button onclick='location.reload()'>العب مرة أخرى</button>";
+}else{
+setup();
+}
+}
+
+setup();
+</script>
+</body>
+</html>

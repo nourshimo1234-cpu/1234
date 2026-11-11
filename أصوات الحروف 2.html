@@ -1,0 +1,85 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اربط الحرف بالصورة</title>
+<style>
+body{font-family:Tahoma;background:#fff4e8;text-align:center;padding:15px}
+.card{max-width:650px;margin:20px auto;background:white;border-radius:25px;padding:25px;box-shadow:0 5px 15px #0002}
+h1{color:#df8735;font-size:30px}
+.pic{font-size:100px;margin:20px}
+.word{font-size:28px;color:#555}
+.options{display:flex;justify-content:center;gap:15px;flex-wrap:wrap}
+button{cursor:pointer;border:3px solid #f5d7b5;border-radius:20px;background:#fff1df;padding:15px 30px;font-size:55px;color:#a85b20}
+#feedback{font-size:24px;min-height:45px;font-weight:bold;margin:15px}
+.good{color:green}.bad{color:#e16b50}
+.next{font-size:22px;background:#ffca65;border:0;color:#704500}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🧩 هيا نربط الحرف بالصورة!</h1>
+<p style="font-size:21px">انظر إلى الصورة، واختر الحرف الذي تبدأ به.</p>
+<div class="pic" id="picture"></div>
+<div class="word" id="word"></div>
+<div class="options" id="options"></div>
+<div id="feedback"></div>
+<p id="count"></p>
+<button class="next" id="next" onclick="next()" hidden>التالي ➡️</button>
+</div>
+
+<script>
+const data=[
+{pic:"🍌",word:"موز",letter:"م",choices:["م","ب","س"]},
+{pic:"🐟",word:"سمكة",letter:"س",choices:["ر","س","ت"]},
+{pic:"🚪",word:"باب",letter:"ب",choices:["ب","م","ل"]},
+{pic:"🍎",word:"تفاحة",letter:"ت",choices:["ت","س","ن"]},
+{pic:"🌹",word:"وردة",letter:"و",choices:["و","م","ب"]}
+];
+let i=0,done=false;
+
+function display(){
+done=false;
+let q=data[i];
+document.getElementById("picture").textContent=q.pic;
+document.getElementById("word").textContent=q.word;
+document.getElementById("feedback").textContent="";
+document.getElementById("next").hidden=true;
+document.getElementById("count").textContent="الصورة "+(i+1)+" من "+data.length;
+let choices=[...q.choices].sort(()=>Math.random()-.5);
+document.getElementById("options").innerHTML="";
+choices.forEach(c=>{
+let b=document.createElement("button");
+b.textContent=c;
+b.onclick=()=>answer(c);
+document.getElementById("options").appendChild(b);
+});
+}
+
+function answer(c){
+if(done)return;
+done=true;
+let f=document.getElementById("feedback");
+if(c===data[i].letter){
+f.textContent="⭐ أحسنت! هذا هو الحرف الصحيح.";
+f.className="good";
+}else{
+f.textContent="👏 حاول مرة أخرى في الصورة التالية.";
+f.className="bad";
+}
+document.getElementById("next").hidden=false;
+}
+
+function next(){
+i++;
+if(i===data.length){
+document.querySelector(".card").innerHTML=
+"<h1>🎉 برافو!</h1><div class='pic'>🏆</div><p>لقد ربطت الحروف بالصور بنجاح!</p><button class='next' onclick='location.reload()'>العب مرة أخرى</button>";
+}else display();
+}
+display();
+</script>
+</body>
+</html>
