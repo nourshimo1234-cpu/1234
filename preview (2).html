@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أطعم الأرنب</title>
+<style>
+body{font-family:Tahoma;background:#eaf8ff;text-align:center;padding:20px;color:#36536b}
+.box{max-width:650px;margin:auto;background:white;padding:25px;border-radius:25px;box-shadow:0 4px 15px #ccc}
+h1{color:#339b80}
+.rabbit{font-size:85px}
+.carrots{font-size:48px;min-height:90px;line-height:1.8}
+.question{font-size:26px;margin:20px}
+button{font-size:25px;padding:14px 25px;margin:8px;border:0;border-radius:17px;background:#b9edb7;cursor:pointer}
+button:hover{background:#80d78b}
+.feedback{font-size:24px;min-height:65px;color:#21854c}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🐰 أطعم الأرنب الجائع</h1>
+<div class="rabbit">🐰</div>
+<p class="question" id="question"></p>
+<div class="carrots" id="carrots"></div>
+<p style="font-size:22px">كم جزرة سيأكل الأرنب؟</p>
+<div id="answers"></div>
+<div class="feedback" id="feedback">ساعد الأرنب الصغير! 💚</div>
+<button onclick="hint()">💡 ساعدني</button>
+<button onclick="next()">السؤال التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+
+<script>
+const data=[
+[1,1],[2,1],[1,2],[2,2],[3,1],[3,2]
+];
+let i=0,score=0,done=false;
+
+function show(){
+ done=false;
+ let [a,b]=data[i];
+ document.getElementById("question").textContent=
+ "لدى الأرنب "+a+" جزرة، وأعطيناه "+b+" جزرة أخرى.";
+ document.getElementById("carrots").textContent=
+ "🥕 ".repeat(a)+" ➕ "+"🥕 ".repeat(b);
+ document.getElementById("feedback").textContent="اجمع الجزر واختر الإجابة!";
+ let c=a+b;
+ let opts=[c,c+1,Math.max(1,c-1)];
+ document.getElementById("answers").innerHTML="";
+ opts.forEach(n=>{
+ let btn=document.createElement("button");
+ btn.textContent=n+" 🥕";
+ btn.onclick=()=>answer(n,c);
+ document.getElementById("answers").appendChild(btn);
+ });
+}
+function answer(n,c){
+ if(done)return;
+ if(n===c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="🥕 رائع! الأرنب سعيد جدًا بك!";
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="💚 لا بأس! عدّ الجزر مرة أخرى.";
+ }
+}
+function hint(){
+ let [a,b]=data[i];
+ document.getElementById("feedback").textContent=
+ "💡 ابدأ بعدّ "+a+"، ثم أضف إليها "+b+".";
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.querySelector(".question").textContent="انتهت مغامرة الأرنب!";
+ document.getElementById("carrots").textContent="🐰🥕🏆";
+ document.getElementById("answers").innerHTML="";
+ document.getElementById("feedback").textContent="أحسنت! أنت بطل الجمع ⭐";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

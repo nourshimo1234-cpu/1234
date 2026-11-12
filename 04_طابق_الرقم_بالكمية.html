@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>طابق الرقم بالكمية</title><style>
+:root{--ink:#263238;--blue:#4f8edc;--pink:#ff8fab;--yellow:#ffd166;--green:#55b98a;--bg:#f4f8ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#eef6ff,#fff5f8);color:var(--ink);direction:rtl}
+main{max-width:850px;margin:0 auto;padding:18px}
+header,.panel{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 24px #3453  ;margin-bottom:16px}
+h1{font-size:clamp(25px,5vw,36px);margin:4px 0 10px;color:#315b9b}
+p{font-size:clamp(18px,3vw,22px);line-height:1.7;margin:8px 0}
+.small{font-size:16px;color:#64748b}
+.big-number{font-size:clamp(90px,20vw,150px);font-weight:900;color:#477ed1;line-height:1.1}
+button,.choice,.drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:16px 20px;font-size:clamp(20px,4vw,26px);font-weight:bold}
+button{background:#4f8edc;color:white;box-shadow:0 5px 0 #3268ae}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #3268ae}
+button.secondary{background:#ffb6c8;box-shadow:0 5px 0 #df829c;color:#542b3b}
+button.green{background:#55b98a;box-shadow:0 5px 0 #33845e}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.choice{background:#f0f6ff;border:4px solid #d5e5ff;color:#315b9b;min-height:100px}
+.choice:focus,button:focus{outline:4px solid #ffd166;outline-offset:3px}
+.choice.correct{background:#e2f8eb;border-color:#55b98a}
+.choice.wrong{background:#fff0f0;border-color:#ff9b9b}
+.objects{font-size:clamp(38px,8vw,60px);letter-spacing:5px;line-height:1.6;min-height:90px}
+.feedback{font-size:24px;font-weight:bold;min-height:42px;color:#25845a;text-align:center;margin:12px}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+.progress{height:12px;background:#e5edf8;border-radius:99px;overflow:hidden;margin:12px 0}
+.progress span{display:block;height:100%;background:#55b98a;width:0%;transition:width .3s}
+.hidden{display:none!important}
+.drop{background:#fff9e8;border:3px dashed #e9b94f;min-width:130px;min-height:90px;color:#805c14}
+.piece{background:#eaf2ff;color:#315b9b;border:3px solid #b9d2fa;border-radius:18px;padding:14px 22px;font-size:36px;font-weight:bold;display:inline-block;cursor:grab;touch-action:manipulation}
+footer{text-align:center;color:#64748b;font-size:14px;padding:10px}
+@media(max-width:520px){main{padding:10px}.grid{gap:9px}.choice{padding:12px;min-height:85px}}
+</style></head>
+<body><main>
+<header><div class="small">رحلة الأرقام الممتعة • الجلسة ١٩</div><h1>طابق الرقم بالكمية</h1>
+<p>أهلًا يا بطل! 🌟 هيا نلعب ونتعلم. اضغط على زر «اسمع» إذا أردت سماع التعليمات.</p></header>
+
+<section class="panel" style="text-align:center">
+<p>اسحب الرقم إلى مجموعة الصور المناسبة، أو اضغط على الرقم ثم اضغط على المكان المناسب.</p>
+<div class="row" id="pieces"><span class="piece" draggable="true" data-n="٣" onclick="selectPiece(this)">٣</span><span class="piece" draggable="true" data-n="٤" onclick="selectPiece(this)">٤</span></div>
+</section>
+<section class="panel">
+<div class="grid">
+<div style="text-align:center"><div class="objects">🍊 🍊 🍊</div><div class="drop" data-n="٣" onclick="place(this)">ضع الرقم هنا</div></div>
+<div style="text-align:center"><div class="objects">🦋 🦋 🦋 🦋</div><div class="drop" data-n="٤" onclick="place(this)">ضع الرقم هنا</div></div>
+</div><div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="row"><button class="green" onclick="resetGame()">ابدأ من جديد</button><button onclick="sayHelp()">🔊 مساعدة</button></div>
+</section>
+
+<footer>أحسنت المحاولة! يمكنك اللعب مرة أخرى متى أحببت 💛</footer>
+</main><script>
+let selected=null,placed=0;
+function say(t){if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';speechSynthesis.speak(u)}}
+function sayHelp(){say('ثلاث برتقالات تحتاج الرقم ثلاثة. أربع فراشات تحتاج الرقم أربعة.')}
+function selectPiece(el){selected=el;document.querySelectorAll('.piece').forEach(p=>p.style.outline='none');el.style.outline='4px solid #ffd166'}
+function place(zone){if(!selected){document.getElementById('feedback').textContent='اختر رقمًا أولًا.';return}put(selected,zone)}
+function put(piece,zone){if(piece.dataset.n===zone.dataset.n){zone.textContent='✓ '+piece.dataset.n;zone.style.border='3px solid #55b98a';zone.style.background='#e2f8eb';piece.style.visibility='hidden';piece.draggable=false;selected=null;placed++;document.getElementById('feedback').textContent=placed===2?'🎉 أحسنت! طابقت الرقمين بالكمية.':'رائع! بقيت مجموعة واحدة.';say(placed===2?'أحسنت! أكملت النشاط.':'إجابة صحيحة!')}else{document.getElementById('feedback').textContent='حاول مرة أخرى. عدّ الصور.';say('حاول مرة أخرى. عد الصور.')}} 
+document.querySelectorAll('.piece').forEach(p=>{p.addEventListener('dragstart',e=>{selected=p;e.dataTransfer.setData('text/plain',p.dataset.n)})});
+document.querySelectorAll('.drop').forEach(z=>{z.addEventListener('dragover',e=>e.preventDefault());z.addEventListener('drop',e=>{e.preventDefault();let n=e.dataTransfer.getData('text/plain');let p=[...document.querySelectorAll('.piece')].find(x=>x.dataset.n===n);if(p)put(p,z)})});
+function resetGame(){placed=0;selected=null;document.querySelectorAll('.piece').forEach(p=>{p.style.visibility='visible';p.draggable=true;p.style.outline='none'});document.querySelectorAll('.drop').forEach(z=>{z.textContent='ضع الرقم هنا';z.style.border='3px dashed #e9b94f';z.style.background='#fff9e8'});document.getElementById('feedback').textContent=''}
+</script></body></html>

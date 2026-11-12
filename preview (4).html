@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>قصص الجمع الممتعة</title>
+<style>
+body{font-family:Tahoma;background:#fff8df;text-align:center;padding:20px;color:#58472d}
+.box{max-width:680px;margin:auto;background:white;padding:25px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#e39b30;font-size:29px}
+.story{font-size:25px;line-height:1.8;background:#fff1c7;padding:18px;border-radius:20px}
+.picture{font-size:55px;margin:20px;line-height:1.7}
+.answers button{font-size:27px;padding:15px 30px;margin:8px;border:0;border-radius:17px;background:#c9edcc;cursor:pointer}
+.answers button:hover{background:#8fdaa0}
+.feedback{font-size:24px;min-height:65px;color:#24834a}
+.control{font-size:20px;padding:12px 20px;margin:7px;border:0;border-radius:15px;background:#ffdc8c;cursor:pointer}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>📖 قصص الجمع الممتعة</h1>
+<p style="font-size:21px">استمع إلى القصة، وانظر إلى الصور، ثم أجب.</p>
+
+<div class="story" id="story"></div>
+<div class="picture" id="picture"></div>
+
+<p style="font-size:23px">كم أصبح العدد الآن؟</p>
+<div class="answers" id="answers"></div>
+
+<div class="feedback" id="feedback">هيا نساعد أصدقاءنا! ⭐</div>
+
+<button class="control" onclick="listen()">🔊 استمع إلى القصة</button>
+<button class="control" onclick="hint()">💡 مساعدة</button>
+<button class="control" onclick="next()">القصة التالية ➜</button>
+
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+
+<script>
+const stories=[
+{
+text:"كان مع سارة بالون واحد 🎈، وأعطاها صديقها بالونًا آخر. كم بالونًا أصبح معها؟",
+emoji:"🎈",
+a:1,b:1
+},
+{
+text:"رأى أحمد عصفورين 🐦 على الشجرة، ثم جاء عصفور آخر. كم عصفورًا أصبح على الشجرة؟",
+emoji:"🐦",
+a:2,b:1
+},
+{
+text:"لدى مريم تفاحتان 🍎، وأعطتها أمها تفاحتين أخريين. كم تفاحة أصبحت معها؟",
+emoji:"🍎",
+a:2,b:2
+},
+{
+text:"في الحديقة ثلاث زهرات 🌸، ثم تفتحت زهرة أخرى. كم زهرة أصبحت في الحديقة؟",
+emoji:"🌸",
+a:3,b:1
+},
+{
+text:"لدى الطفل سمكة واحدة 🐟، ثم أضاف إليها سمكتين. كم سمكة لديه الآن؟",
+emoji:"🐟",
+a:1,b:2
+},
+{
+text:"في السماء ثلاث نجوم ⭐، ثم ظهرت نجمتان أخريان. كم نجمة أصبحت في السماء؟",
+emoji:"⭐",
+a:3,b:2
+}
+];
+
+let i=0,score=0,done=false;
+
+function show(){
+ done=false;
+ let q=stories[i];
+ document.getElementById("story").textContent=q.text;
+ document.getElementById("picture").textContent=
+ q.emoji.repeat(q.a)+" ➕ "+q.emoji.repeat(q.b);
+ document.getElementById("feedback").textContent="فكر وعدّ الصور!";
+ let c=q.a+q.b;
+ let options=[c,c+1,c-1];
+ document.getElementById("answers").innerHTML="";
+ options.forEach(n=>{
+ let btn=document.createElement("button");
+ btn.textContent=n;
+ btn.onclick=()=>check(n,c);
+ document.getElementById("answers").appendChild(btn);
+ });
+}
+
+function check(n,c){
+ if(done)return;
+ if(n===c){
+ done=true;
+ score++;
+ document.getElementById("feedback").textContent=
+ "🎉 أحسنت! لقد حللت القصة بنجاح!";
+ document.getElementById("score").textContent=
+ "النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent=
+ "💛 حاول مرة أخرى، وعدّ الصور واحدة واحدة.";
+ }
+}
+
+function hint(){
+ let q=stories[i];
+ document.getElementById("feedback").textContent=
+ "💡 ابدأ بعدّ "+q.a+"، ثم أضف "+q.b+" أخرى.";
+}
+
+function listen(){
+ if("speechSynthesis" in window){
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(stories[i].text);
+ u.lang="ar-SA";
+ u.rate=0.85;
+ speechSynthesis.speak(u);
+ }
+}
+
+function next(){
+ i++;
+ if(i>=stories.length){
+ document.getElementById("story").textContent=
+ "🎊 انتهت جميع القصص! أنت بطل الجمع الصغير.";
+ document.getElementById("picture").textContent="🏆🌟🎈";
+ document.getElementById("answers").innerHTML="";
+ document.getElementById("feedback").textContent=
+ "أحسنت! لقد أنهيت القصص وحصلت على "+score+" نجمة.";
+ speechSynthesis.cancel();
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

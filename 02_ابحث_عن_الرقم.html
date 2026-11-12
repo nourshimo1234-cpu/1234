@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أين الرقم؟</title><style>
+:root{--ink:#263238;--blue:#4f8edc;--pink:#ff8fab;--yellow:#ffd166;--green:#55b98a;--bg:#f4f8ff}
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#eef6ff,#fff5f8);color:var(--ink);direction:rtl}
+main{max-width:850px;margin:0 auto;padding:18px}
+header,.panel{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 24px #3453  ;margin-bottom:16px}
+h1{font-size:clamp(25px,5vw,36px);margin:4px 0 10px;color:#315b9b}
+p{font-size:clamp(18px,3vw,22px);line-height:1.7;margin:8px 0}
+.small{font-size:16px;color:#64748b}
+.big-number{font-size:clamp(90px,20vw,150px);font-weight:900;color:#477ed1;line-height:1.1}
+button,.choice,.drop{font:inherit;cursor:pointer;border:0;border-radius:18px;padding:16px 20px;font-size:clamp(20px,4vw,26px);font-weight:bold}
+button{background:#4f8edc;color:white;box-shadow:0 5px 0 #3268ae}
+button:active{transform:translateY(3px);box-shadow:0 2px 0 #3268ae}
+button.secondary{background:#ffb6c8;box-shadow:0 5px 0 #df829c;color:#542b3b}
+button.green{background:#55b98a;box-shadow:0 5px 0 #33845e}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.choice{background:#f0f6ff;border:4px solid #d5e5ff;color:#315b9b;min-height:100px}
+.choice:focus,button:focus{outline:4px solid #ffd166;outline-offset:3px}
+.choice.correct{background:#e2f8eb;border-color:#55b98a}
+.choice.wrong{background:#fff0f0;border-color:#ff9b9b}
+.objects{font-size:clamp(38px,8vw,60px);letter-spacing:5px;line-height:1.6;min-height:90px}
+.feedback{font-size:24px;font-weight:bold;min-height:42px;color:#25845a;text-align:center;margin:12px}
+.row{display:flex;gap:12px;justify-content:center;align-items:center;flex-wrap:wrap}
+.progress{height:12px;background:#e5edf8;border-radius:99px;overflow:hidden;margin:12px 0}
+.progress span{display:block;height:100%;background:#55b98a;width:0%;transition:width .3s}
+.hidden{display:none!important}
+.drop{background:#fff9e8;border:3px dashed #e9b94f;min-width:130px;min-height:90px;color:#805c14}
+.piece{background:#eaf2ff;color:#315b9b;border:3px solid #b9d2fa;border-radius:18px;padding:14px 22px;font-size:36px;font-weight:bold;display:inline-block;cursor:grab;touch-action:manipulation}
+footer{text-align:center;color:#64748b;font-size:14px;padding:10px}
+@media(max-width:520px){main{padding:10px}.grid{gap:9px}.choice{padding:12px;min-height:85px}}
+</style></head>
+<body><main>
+<header><div class="small">رحلة الأرقام الممتعة • الجلسة ١٩</div><h1>أين الرقم؟</h1>
+<p>أهلًا يا بطل! 🌟 هيا نلعب ونتعلم. اضغط على زر «اسمع» إذا أردت سماع التعليمات.</p></header>
+
+<section class="panel" style="text-align:center">
+<p>ابحث عن الرقم المطلوب واضغط عليه.</p>
+<div class="row"><span style="font-size:24px">ابحث عن:</span><span class="big-number" id="target" style="font-size:90px">٣</span></div>
+<button onclick="speak()">🔊 اسمع الرقم</button>
+</section>
+<section class="panel"><div class="grid" id="board"></div><div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="row"><button class="green" onclick="newRound()">جولة جديدة</button></div></section>
+
+<footer>أحسنت المحاولة! يمكنك اللعب مرة أخرى متى أحببت 💛</footer>
+</main><script>
+let target='٣',locked=false;
+function say(t){if('speechSynthesis'in window){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';speechSynthesis.speak(u)}}
+function speak(){say(target==='٣'?'ابحث عن الرقم ثلاثة':'ابحث عن الرقم أربعة')}
+function newRound(){target=Math.random()<.5?'٣':'٤';locked=false;document.getElementById('target').textContent=target;document.getElementById('feedback').textContent='';let arr=[target,target,...['١','٢','٣','٤'].filter(x=>x!==target)].sort(()=>Math.random()-.5);let board=document.getElementById('board');board.innerHTML='';arr.forEach(n=>{let b=document.createElement('button');b.className='choice';b.textContent=n;b.onclick=()=>{if(locked)return;if(n===target){locked=true;b.classList.add('correct');document.getElementById('feedback').textContent='⭐ وجدته! أحسنت.';say('رائع! وجدته.')}else{b.classList.add('wrong');document.getElementById('feedback').textContent='ليس هذا، جرّب رقمًا آخر.';say('جرّب مرة أخرى.')}};board.appendChild(b)})}
+newRound();
+</script></body></html>

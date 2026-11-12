@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختر صورة الجمع</title>
+<style>
+body{font-family:Tahoma;background:#fff3f8;text-align:center;padding:20px;color:#62435b}
+.box{max-width:700px;margin:auto;background:white;padding:25px;border-radius:25px}
+h1{color:#d65c91}
+.equation{font-size:48px;color:#287cba;font-weight:bold;margin:25px}
+.options{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.option{background:#f4e7ff;border:3px solid #e4c9f7;border-radius:20px;padding:20px;min-width:140px;cursor:pointer;font-size:40px}
+.option:hover{background:#ffe3ed}
+.option p{font-size:20px}
+.feedback{font-size:24px;min-height:65px;color:#25844c}
+button{font-size:22px;padding:13px 25px;border:0;border-radius:15px;background:#ffd77d;cursor:pointer;margin:10px}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🧸 اختر صورة الجمع الصحيحة</h1>
+<p style="font-size:23px">انظر إلى العملية، ثم اختر الصورة المناسبة لها.</p>
+<div class="equation" id="equation"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback">فكر جيدًا! 🌟</div>
+<button onclick="hint()">💡 مساعدة</button>
+<button onclick="next()">السؤال التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+
+<script>
+const data=[
+{a:1,b:1,emoji:"🐥"},
+{a:1,b:2,emoji:"🍓"},
+{a:2,b:1,emoji:"⚽"},
+{a:2,b:2,emoji:"🌸"},
+{a:3,b:1,emoji:"🐟"},
+{a:1,b:3,emoji:"🎈"}
+];
+let i=0,score=0,done=false;
+
+function show(){
+ done=false;
+ let q=data[i],c=q.a+q.b;
+ document.getElementById("equation").textContent=q.a+" + "+q.b+" = ؟";
+ document.getElementById("feedback").textContent="أي صورة تمثل هذا العدد؟";
+ let counts=[c,c+1,Math.max(1,c-1)].sort(()=>Math.random()-.5);
+ document.getElementById("options").innerHTML="";
+ counts.forEach(n=>{
+ let div=document.createElement("div");
+ div.className="option";
+ div.innerHTML=q.emoji.repeat(n)+"<p>عددها "+n+"</p>";
+ div.onclick=()=>check(n,c);
+ document.getElementById("options").appendChild(div);
+ });
+}
+function check(n,c){
+ if(done)return;
+ if(n===c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="👏 ممتاز! هذه هي الصورة الصحيحة!";
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="😊 انظر إلى العدد مرة أخرى وحاول!";
+ }
+}
+function hint(){
+ let q=data[i];
+ document.getElementById("feedback").textContent=
+ "💡 عدّ "+q.a+" ثم أكمل العد "+q.b+" أخرى.";
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("equation").textContent="🏆 رائع!";
+ document.getElementById("options").innerHTML="لقد أصبحت بطل الصور والجمع!";
+ document.getElementById("feedback").textContent="أحسنت يا بطل!";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

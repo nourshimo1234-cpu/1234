@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>هيا نجمع التفاح</title>
+<style>
+body{font-family:Tahoma,Arial;background:#fff4e8;text-align:center;margin:0;padding:20px;color:#553b32}
+.box{max-width:650px;margin:auto;background:white;padding:25px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#e66b42;font-size:30px}
+p{font-size:23px}
+.fruits{font-size:48px;margin:20px;line-height:1.8}
+.equation{font-size:45px;color:#287bba;font-weight:bold;margin:15px}
+button{font-size:25px;padding:15px 25px;margin:8px;border:0;border-radius:18px;background:#ffe08a;cursor:pointer}
+button:hover{background:#ffc94d}
+.feedback{font-size:25px;min-height:65px;margin:15px;color:#20834a;font-weight:bold}
+.small{font-size:18px;background:#e5f3ff}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🍎 هيا نجمع التفاح 🍎</h1>
+<p>انظر إلى التفاح، ثم اختر العدد الصحيح!</p>
+
+<div id="question"></div>
+<div class="equation" id="equation"></div>
+<div class="fruits" id="fruits"></div>
+
+<div id="answers"></div>
+<div class="feedback" id="feedback">أنت تستطيع! ⭐</div>
+
+<button class="small" onclick="hint()">💡 ساعدني</button>
+<button class="small" onclick="speakQuestion()">🔊 استمع</button>
+<button class="small" onclick="next()">السؤال التالي ➜</button>
+
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+
+<script>
+const questions=[
+[1,1],[1,2],[2,1],[2,2],[3,1],[1,3],[2,3],[3,2]
+];
+let index=0,score=0,answered=false;
+
+function draw(){
+ answered=false;
+ let [a,b]=questions[index];
+ document.getElementById("question").textContent="لديك تفاحات، ثم أضفنا إليها تفاحات أخرى!";
+ document.getElementById("equation").textContent=a+" + "+b+" = ؟";
+ document.getElementById("fruits").innerHTML=
+ "🍎 ".repeat(a)+" ➕ "+"🍎 ".repeat(b);
+ document.getElementById("feedback").textContent="كم تفاحة لدينا الآن؟";
+ let correct=a+b;
+ let options=[correct,correct+1,Math.max(1,correct-1)];
+ options=[...new Set(options)].sort(()=>Math.random()-.5);
+ while(options.length<3) options.push(correct+2);
+ options=options.slice(0,3);
+ if(!options.includes(correct)) options[0]=correct;
+ options.sort(()=>Math.random()-.5);
+ document.getElementById("answers").innerHTML="";
+ options.forEach(n=>{
+ let btn=document.createElement("button");
+ btn.textContent=n;
+ btn.onclick=()=>check(n,correct);
+ document.getElementById("answers").appendChild(btn);
+ });
+}
+function check(n,c){
+ if(answered)return;
+ if(n===c){
+ answered=true;score++;
+ document.getElementById("feedback").textContent="🎉 أحسنت! جمعت التفاحات بنجاح!";
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="😊 حاول مرة أخرى. عدّ التفاحات معًا!";
+ }
+}
+function hint(){
+ let [a,b]=questions[index];
+ document.getElementById("feedback").textContent=
+ "💡 عدّ "+a+" تفاحة، ثم أكمل العد "+b+" تفاحة أخرى.";
+}
+function speakQuestion(){
+ let [a,b]=questions[index];
+ if("speechSynthesis" in window){
+ let u=new SpeechSynthesisUtterance("لديك "+a+" تفاحة، وأضفنا "+b+" تفاحة. كم تفاحة أصبح لدينا؟");
+ u.lang="ar-SA";speechSynthesis.speak(u);
+ }
+}
+function next(){
+ index++;
+ if(index>=questions.length){
+ document.getElementById("question").textContent="🎊 انتهت اللعبة!";
+ document.getElementById("equation").textContent="أنت بطل الجمع!";
+ document.getElementById("fruits").textContent="🏆🍎🏆";
+ document.getElementById("answers").innerHTML="";
+ document.getElementById("feedback").textContent="رائع! حصلت على "+score+" نجمة.";
+ return;
+ }
+ draw();
+}
+draw();
+</script>
+</body>
+</html>
