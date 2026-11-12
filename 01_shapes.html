@@ -1,0 +1,36 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مغامرة الأشكال الهندسية</title><style>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#eef7ff,#fff9ed);font-family:Tahoma,Arial;text-align:center;color:#263d58}
+header{background:white;padding:18px;border-bottom:4px solid #dceaf6}h1{color:#28659b;margin:4px;font-size:clamp(25px,4vw,36px)}
+main{max-width:900px;margin:18px auto;padding:0 12px}.card{background:white;border:3px solid #dce9f5;border-radius:24px;padding:20px 14px;min-height:350px}
+h2{font-size:27px}.instruction{font-size:21px;line-height:1.8;color:#607b98}.visual{font-size:clamp(48px,9vw,80px);margin:20px;min-height:90px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;max-width:760px;margin:18px auto}
+.choice{background:#f5faff;border:3px solid #d8e8f5;border-radius:19px;min-height:105px;font-size:30px;font-weight:bold;color:#263d58;padding:12px;cursor:pointer}
+.choice span{display:block;font-size:17px;margin-top:7px}.btn{border:0;border-radius:16px;padding:13px 20px;font-size:18px;font-weight:bold;background:#f6bd4e;color:#523b10;cursor:pointer;margin:6px}
+.blue{background:#3989c5;color:white}.soft{background:#e7f0f8;color:#315a7e}
+.feedback{font-size:28px;font-weight:bold;min-height:44px;margin:14px;color:#27966d}
+.progress{height:12px;background:#e6edf5;border-radius:20px;max-width:600px;margin:14px auto;overflow:hidden}.progress span{display:block;height:100%;background:#55c39b;width:0}
+.story{background:#fff7e7;border:2px solid #f2dfb9;border-radius:18px;padding:18px;font-size:21px;line-height:2;margin:15px auto;max-width:700px}
+canvas{max-width:100%;background:white;border:3px dashed #bdd0e2;border-radius:16px;touch-action:none}
+</style></head>
+<body><header><h1>مغامرة الأشكال الهندسية</h1><div>نتعرف على الأشكال ونكتشفها حولنا</div></header><main>
+<div class="progress"><span id="bar"></span></div><section class="card" id="stage"><h2>هيا نلعب مع الأشكال!</h2><p class="instruction" id="taskPrompt"></p><div class="visual" id="visual"></div><div class="grid" id="choices"></div></section>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<button class="btn soft" onclick="readInstruction()">🔊 استمع</button><button class="btn blue" onclick="restart()">↻ ابدأ من جديد</button>
+</main><script>
+const qs=[
+["أين الدائرة؟","دائرة",["مربع","دائرة","مثلث"],["🟦","🔵","🔺"]],
+["اختر المثلث.","مثلث",["مثلث","مستطيل","دائرة"],["🔺","▭","⚪"]],
+["أين المربع؟","مربع",["دائرة","مربع","مثلث"],["⚪","🟩","🔺"]],
+["اختر المستطيل.","مستطيل",["مستطيل","مربع","دائرة"],["▭","🟦","⚪"]],
+["أي شكل يشبه ساعة الحائط؟","دائرة",["مثلث","دائرة","مستطيل"],["🔺","🕒","▭"]],
+["أي شكل يشبه الباب؟","مستطيل",["دائرة","مستطيل","مربع"],["⚪","🚪","🟩"]]
+];let i=0;
+function render(){feedback.textContent="";taskPrompt.textContent=qs[i][0];visual.textContent="🔎";bar.style.width=(i/qs.length*100)+"%";choices.innerHTML=qs[i][2].map((x,n)=>`<button class="choice" onclick="answer('${x}')">${qs[i][3][n]}<span>${x}</span></button>`).join("")}
+function answer(x){if(x!==qs[i][1])return fb(false);fb(true);setTimeout(()=>{i++;if(i===qs.length)done();else render()},800)}
+function fb(ok){feedback.textContent=ok?"ممتاز":"حاول مرة أخرى";feedback.style.color=ok?"#27966d":"#bd7928";speak(feedback.textContent)}
+function done(){bar.style.width="100%";stage.innerHTML='<h2>أكملت مغامرة الأشكال!</h2><div class="visual">🔵 🟩 🔺 ▭</div><p class="instruction">تعرفت على الأشكال الهندسية.</p>'}
+function restart(){i=0;stage.innerHTML='<h2>هيا نلعب مع الأشكال!</h2><p class="instruction" id="taskPrompt"></p><div class="visual" id="visual"></div><div class="grid" id="choices"></div>';render()}
+function speak(t){if(!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.82;speechSynthesis.speak(u)}
+function readInstruction(){speak(taskPrompt.textContent)}
+render();
+</script></body></html>

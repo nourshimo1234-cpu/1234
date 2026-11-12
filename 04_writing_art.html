@@ -1,0 +1,32 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>مرسمي ومهاراتي</title><style>
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(#eef7ff,#fff9ed);font-family:Tahoma,Arial;text-align:center;color:#263d58}
+header{background:white;padding:18px;border-bottom:4px solid #dceaf6}h1{color:#28659b;margin:4px;font-size:clamp(25px,4vw,36px)}
+main{max-width:900px;margin:18px auto;padding:0 12px}.card{background:white;border:3px solid #dce9f5;border-radius:24px;padding:20px 14px;min-height:350px}
+h2{font-size:27px}.instruction{font-size:21px;line-height:1.8;color:#607b98}.visual{font-size:clamp(48px,9vw,80px);margin:20px;min-height:90px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;max-width:760px;margin:18px auto}
+.choice{background:#f5faff;border:3px solid #d8e8f5;border-radius:19px;min-height:105px;font-size:30px;font-weight:bold;color:#263d58;padding:12px;cursor:pointer}
+.choice span{display:block;font-size:17px;margin-top:7px}.btn{border:0;border-radius:16px;padding:13px 20px;font-size:18px;font-weight:bold;background:#f6bd4e;color:#523b10;cursor:pointer;margin:6px}
+.blue{background:#3989c5;color:white}.soft{background:#e7f0f8;color:#315a7e}
+.feedback{font-size:28px;font-weight:bold;min-height:44px;margin:14px;color:#27966d}
+.progress{height:12px;background:#e6edf5;border-radius:20px;max-width:600px;margin:14px auto;overflow:hidden}.progress span{display:block;height:100%;background:#55c39b;width:0}
+.story{background:#fff7e7;border:2px solid #f2dfb9;border-radius:18px;padding:18px;font-size:21px;line-height:2;margin:15px auto;max-width:700px}
+canvas{max-width:100%;background:white;border:3px dashed #bdd0e2;border-radius:16px;touch-action:none}
+</style></head>
+<body><header><h1>مرسمي ومهاراتي</h1><div>نتدرب على الكتابة ونطلق خيالنا بالرسم والتلوين</div></header><main>
+<div class="progress"><span id="bar"></span></div><section class="card" id="stage"><h2>اختر نشاطك</h2><p class="instruction" id="taskPrompt">هل تريد تتبع الحروف والأرقام أم الرسم والتلوين؟</p><div class="grid"><button class="choice" onclick="trace()">✍️<span>أتتبع الحرف والرقم</span></button><button class="choice" onclick="paint()">🎨<span>أرسم وألون</span></button></div><div id="work"></div></section>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<button class="btn soft" onclick="readInstruction()">🔊 استمع</button><button class="btn blue" onclick="restart()">↻ ابدأ من جديد</button>
+</main><script>
+let ctx,color="#ef5350",down=false;
+function speak(t){if(!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="ar-SA";u.rate=.82;speechSynthesis.speak(u)}
+function readInstruction(){speak(taskPrompt.textContent)}
+function trace(){feedback.textContent="";taskPrompt.textContent="تتبع الحرف أو الرقم بإصبعك أو بالفأرة.";work.innerHTML='<p class="instruction">اختر ما تريد التدريب عليه.</p><div class="grid"><button class="btn soft" onclick="guide(\'ب\')">حرف ب</button><button class="btn soft" onclick="guide(\'م\')">حرف م</button><button class="btn soft" onclick="guide(\'٣\')">رقم ٣</button></div><canvas id="pad" width="650" height="280"></canvas><br><button class="btn" onclick="clearPad()">مسح</button><button class="btn blue" onclick="good()">انتهيت</button>';guide("ب")}
+function guide(ch){let c=document.getElementById("pad");ctx=c.getContext("2d");ctx.clearRect(0,0,c.width,c.height);ctx.fillStyle="#e1eaf2";ctx.font="bold 190px Tahoma";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(ch,325,145);drawSetup(c)}
+function drawSetup(c){c.onpointerdown=e=>{down=true;let p=pos(e,c);ctx.beginPath();ctx.moveTo(p.x,p.y)};c.onpointermove=e=>{if(!down)return;let p=pos(e,c);ctx.strokeStyle="#3989c5";ctx.lineWidth=9;ctx.lineCap="round";ctx.lineTo(p.x,p.y);ctx.stroke()};c.onpointerup=()=>down=false;c.onpointerleave=()=>down=false}
+function pos(e,c){let r=c.getBoundingClientRect();return{x:(e.clientX-r.left)*c.width/r.width,y:(e.clientY-r.top)*c.height/r.height}}
+function clearPad(){let c=document.getElementById("pad");ctx.clearRect(0,0,c.width,c.height)}
+function paint(){feedback.textContent="";taskPrompt.textContent="اختر لونًا ثم اضغط على أجزاء الزهرة لتلوينها، وارسم بحرية.";work.innerHTML='<div class="grid">'+["#ef5350","#ffca28","#66bb6a","#42a5f5","#ab7bea","#8d6e63"].map(c=>`<button class="choice" style="background:${c};min-height:55px" onclick="color='${c}'"></button>`).join("")+'</div><p class="instruction">اضغط على كل جزء من الزهرة لتلوينه.</p><svg viewBox="0 0 400 240" style="width:min(100%,500px);background:white;border:2px dashed #cbdbea;border-radius:16px"><path d="M190 125L190 215H210V125" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/><circle cx="200" cy="105" r="30" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/><circle cx="155" cy="105" r="25" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/><circle cx="245" cy="105" r="25" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/><circle cx="177" cy="65" r="25" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/><circle cx="223" cy="65" r="25" fill="white" stroke="#34465c" stroke-width="5" onclick="this.setAttribute(\'fill\',color)"/></svg><p class="instruction">مساحة للرسم الحر</p><canvas id="free" width="650" height="200"></canvas><br><button class="btn" onclick="clearFree()">مسح الرسم</button><button class="btn blue" onclick="good()">انتهيت</button>';let c=document.getElementById("free");ctx=c.getContext("2d");drawSetup(c)}
+function clearFree(){let c=document.getElementById("free");ctx.clearRect(0,0,c.width,c.height)}
+function good(){feedback.textContent="ممتاز";feedback.style.color="#27966d";speak("ممتاز")}
+function restart(){feedback.textContent="";work.innerHTML="";taskPrompt.textContent="هل تريد تتبع الحروف والأرقام أم الرسم والتلوين؟"}
+</script></body></html>
