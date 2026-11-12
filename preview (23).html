@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ساعد الأرنب</title>
+<style>
+body{font-family:Tahoma;background:#eaf8ff;text-align:center;padding:15px;color:#36536b}
+.box{max-width:650px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#319b80}
+.rabbit{font-size:85px}
+.carrots{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;margin:25px}
+.carrot{font-size:48px;background:#fff1db;border:3px solid #f3c78b;border-radius:15px;padding:8px;cursor:pointer}
+.carrot.removed{opacity:.15;pointer-events:none;transform:scale(.8)}
+p{font-size:22px}
+button{font-size:23px;padding:13px 22px;margin:8px;border:0;border-radius:16px;background:#b9edb7;cursor:pointer}
+.feedback{font-size:23px;min-height:65px;color:#21844d}
+.number{background:#ffe49c}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🐰 ساعد الأرنب الجائع</h1>
+<div class="rabbit">🐰</div>
+<p id="question"></p>
+<div class="carrots" id="carrots"></div>
+<p id="instruction">اضغط على الجزر الذي سيأكله الأرنب!</p>
+<div id="answers"></div>
+<div class="feedback" id="feedback">هيا نساعد الأرنب! 🥕</div>
+<button onclick="hint()">💡 مساعدة</button>
+<button onclick="next()">السؤال التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+
+<script>
+const data=[[2,1],[3,1],[3,2],[4,1],[4,2],[5,2]];
+let i=0,removed=0,score=0,done=false;
+
+function show(){
+ removed=0;done=false;
+ let [a,b]=data[i];
+ document.getElementById("question").textContent=
+ "لدى الأرنب "+a+" جزرات، سيأكل منها "+b+". اضغط على "+b+" جزرة.";
+ document.getElementById("instruction").textContent="اضغط على الجزر ليأكله الأرنب.";
+ document.getElementById("feedback").textContent="ساعد الأرنب على تناول الجزر!";
+ document.getElementById("answers").innerHTML="";
+ let area=document.getElementById("carrots");
+ area.innerHTML="";
+ for(let j=0;j<a;j++){
+ let item=document.createElement("button");
+ item.className="carrot";
+ item.textContent="🥕";
+ item.onclick=()=>{
+ if(done||item.classList.contains("removed")||removed>=b)return;
+ item.classList.add("removed");
+ removed++;
+ document.getElementById("feedback").textContent=
+ "أكل الأرنب "+removed+" من "+b+" جزرات! 🐰";
+ if(removed===b)showAnswers();
+ };
+ area.appendChild(item);
+ }
+}
+function showAnswers(){
+ let c=data[i][0]-data[i][1];
+ document.getElementById("instruction").textContent=
+ "أحسنت! كم جزرة بقيت للأرنب؟";
+ document.getElementById("feedback").textContent="عدّ الجزر الذي بقي!";
+ [c,c+1,Math.max(0,c-1)].forEach(n=>{
+ let btn=document.createElement("button");
+ btn.className="number";btn.textContent=n;
+ btn.onclick=()=>check(n,c);
+ document.getElementById("answers").appendChild(btn);
+ });
+}
+function check(n,c){
+ if(done)return;
+ if(n===c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="🎉 رائع! الأرنب سعيد بك!";
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="💚 عدّ الجزر الباقي مرة أخرى.";
+ }
+}
+function hint(){
+ let [a,b]=data[i];
+ document.getElementById("feedback").textContent=
+ "💡 لديك "+a+" جزرات. أزل "+b+" منها، ثم عدّ الباقي.";
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("question").textContent="🎊 انتهت مغامرة الأرنب!";
+ document.getElementById("carrots").textContent="🐰🥕🏆";
+ document.getElementById("instruction").textContent="";
+ document.getElementById("answers").innerHTML="";
+ document.getElementById("feedback").textContent="أحسنت يا بطل! ⭐";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

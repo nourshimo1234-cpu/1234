@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أكمل الصورة بالسحب</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#eaf6ff,#fff6e9);color:#26364d}
+main{max-width:900px;margin:auto;padding:16px}
+header,.game,.finish{background:#fff;border-radius:25px;padding:20px;text-align:center;box-shadow:0 7px 24px #24364b16}
+h1{margin:5px 0;color:#28639d;font-size:clamp(27px,5vw,40px)}
+.lead{font-size:19px;color:#71839a;line-height:1.6}
+.progress{height:12px;background:#e8edf4;border-radius:20px;overflow:hidden;max-width:620px;margin:16px auto 0}
+.bar{height:100%;width:0;background:#59c49a;transition:.25s}
+.game{margin-top:16px}
+.count{font-size:18px;color:#71839a;font-weight:bold}
+.instruction{font-size:clamp(22px,4vw,29px);font-weight:bold;margin:12px 0}
+.scene{width:min(100%,540px);height:300px;margin:0 auto 14px;background:#f7fbff;border:3px solid #e1edf7;border-radius:22px;display:flex;align-items:center;justify-content:center;padding:10px}
+.scene svg{width:100%;height:100%;max-width:500px}
+.slot{fill:#fff;stroke:#7798b7;stroke-width:4;stroke-dasharray:9 7}
+.slot-label{fill:#8195a8;font-size:13px}
+.tray-label{font-size:18px;color:#71839a;font-weight:bold;margin:8px}
+.tray{display:flex;justify-content:center;gap:14px;flex-wrap:wrap;min-height:112px;padding:12px;background:#fff;border:2px solid #edf2f7;border-radius:20px}
+.piece{width:112px;height:94px;border:2px solid #dceaf6;border-radius:18px;background:#f7fbff;display:flex;align-items:center;justify-content:center;touch-action:none;cursor:grab;user-select:none}
+.piece svg{width:82px;height:82px;pointer-events:none}
+.piece.used{opacity:.25;pointer-events:none}
+.piece.dragging{opacity:.35}
+.ghost{position:fixed;z-index:9999;pointer-events:none;width:90px;height:90px;display:flex;align-items:center;justify-content:center;background:#fff;border:3px solid #347fbd;border-radius:18px;box-shadow:0 8px 25px #26364d33;transform:translate(-50%,-50%)}
+.ghost svg{width:78px;height:78px}
+.feedback{font-size:25px;font-weight:bold;min-height:38px;margin:10px;color:#24855f}
+.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+button{border:0;border-radius:17px;padding:13px 25px;font-size:19px;font-weight:bold;background:#347fbd;color:#fff;cursor:pointer}
+button.listen{background:#f2bd51;color:#533d10}
+button:disabled{opacity:.4;cursor:not-allowed}
+.finish{display:none;margin-top:16px}
+.note{font-size:14px;color:#8290a0;margin-top:12px}
+@media(max-width:520px){main{padding:9px}.scene{height:245px}.piece{width:28vw;max-width:105px;height:86px}.piece svg{width:68px;height:68px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div style="font-size:38px">🧩 🏠 🚀</div>
+<h1>أكمل الصورة بالسحب</h1>
+<div class="lead">الصورة جاهزة، لكن ينقصها جزء أو جزءان. اسحب الأجزاء المناسبة لتكتمل!</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+</header>
+
+<section class="game" id="game">
+<div class="count" id="count"></div>
+<div class="instruction" id="instruction"></div>
+<div class="scene" id="scene"></div>
+<div class="tray-label">اختر الجزء الناقص واسحبه إلى مكانه</div>
+<div class="tray" id="tray"></div>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="controls">
+<button class="listen" id="listen">🔊 استمع</button>
+<button id="next" disabled>التالي ←</button>
+</div>
+<div class="note">ضع كل قطعة في المكان الفارغ المناسب.</div>
+</section>
+
+<section class="finish" id="finish">
+<h2 style="font-size:32px;color:#24855f">ممتاز!</h2>
+<p style="font-size:22px">أكملت الصور كلها.</p>
+<button id="again">العب مرة أخرى</button>
+</section>
+</main>
+<script>
+const rounds = [
+{
+ title:"المنزل", prompt:"أكمل المنزل: اسحب السقف والباب إلى مكانهما.",
+ scene:`<svg viewBox="0 0 500 280" aria-label="منزل ينقصه السقف والباب">
+ <rect x="125" y="118" width="250" height="130" rx="5" fill="#f7dca6" stroke="#34465c" stroke-width="7"/>
+ <rect x="155" y="150" width="58" height="58" fill="#8ed0f0" stroke="#34465c" stroke-width="5"/>
+ <rect x="287" y="150" width="58" height="58" fill="#8ed0f0" stroke="#34465c" stroke-width="5"/>
+ <polygon class="slot" data-slot="roof" points="105,125 250,22 395,125"/>
+ <rect class="slot" data-slot="door" x="218" y="170" width="64" height="78" rx="8"/>
+ <text class="slot-label" x="250" y="92" text-anchor="middle"> </text>
+ </svg>`,
+ pieces:[
+ {id:"roof",shape:"triangle",color:"#f28d42",fit:"roof"},
+ {id:"door",shape:"door",color:"#a96d42",fit:"door"},
+ {id:"wrong",shape:"circle",color:"#79d49a",fit:"none"}]
+},
+{
+ title:"القارب", prompt:"أكمل القارب: اسحب الشراع الناقص إلى مكانه.",
+ scene:`<svg viewBox="0 0 500 280" aria-label="قارب ينقصه شراع">
+ <polygon points="85,175 415,175 350,245 150,245" fill="#ffbd4a" stroke="#34465c" stroke-width="7"/>
+ <line x1="250" y1="28" x2="250" y2="178" stroke="#34465c" stroke-width="9"/>
+ <polygon class="slot" data-slot="sail" points="238,45 238,158 125,158"/>
+ <polygon points="263,58 263,158 365,158" fill="#f28e8e" stroke="#34465c" stroke-width="6"/>
+ </svg>`,
+ pieces:[
+ {id:"sail",shape:"triangle",color:"#72c7ef",fit:"sail"},
+ {id:"circle",shape:"circle",color:"#79d49a",fit:"none"},
+ {id:"square",shape:"square",color:"#ffbd4a",fit:"none"}]
+},
+{
+ title:"الشجرة", prompt:"أكمل الشجرة: اسحب الأوراق الناقصة إلى مكانها.",
+ scene:`<svg viewBox="0 0 500 280" aria-label="شجرة ينقصها جزء من التاج">
+ <rect x="220" y="145" width="60" height="105" rx="8" fill="#a96d42" stroke="#34465c" stroke-width="6"/>
+ <circle cx="185" cy="112" r="62" fill="#79d49a" stroke="#34465c" stroke-width="6"/>
+ <circle cx="315" cy="112" r="62" fill="#65c985" stroke="#34465c" stroke-width="6"/>
+ <circle class="slot" data-slot="leaf" cx="250" cy="65" r="58"/>
+ </svg>`,
+ pieces:[
+ {id:"leaf",shape:"circle",color:"#79d49a",fit:"leaf"},
+ {id:"triangle",shape:"triangle",color:"#ff9f43",fit:"none"},
+ {id:"rect",shape:"rect",color:"#a96d42",fit:"none"}]
+},
+{
+ title:"الصاروخ", prompt:"أكمل الصاروخ: اسحب رأس الصاروخ والنافذة إلى مكانهما.",
+ scene:`<svg viewBox="0 0 500 280" aria-label="صاروخ ينقصه الرأس والنافذة">
+ <rect x="190" y="90" width="120" height="145" rx="28" fill="#f28e8e" stroke="#34465c" stroke-width="7"/>
+ <polygon points="190,190 145,242 190,230" fill="#ffbd4a" stroke="#34465c" stroke-width="6"/>
+ <polygon points="310,190 355,242 310,230" fill="#ffbd4a" stroke="#34465c" stroke-width="6"/>
+ <polygon class="slot" data-slot="nose" points="250,18 315,95 185,95"/>
+ <circle class="slot" data-slot="window" cx="250" cy="150" r="28"/>
+ </svg>`,
+ pieces:[
+ {id:"nose",shape:"triangle",color:"#ff9f43",fit:"nose"},
+ {id:"window",shape:"circle",color:"#72c7ef",fit:"window"},
+ {id:"trap",shape:"trapezoid",color:"#79d49a",fit:"none"}]
+}
+];
+
+let index=0, filled=new Set(), drag=null, ghost=null;
+const $=id=>document.getElementById(id);
+function speak(t){if(!window.speechSynthesis)return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="ar";u.rate=.9;speechSynthesis.speak(u)}
+function pieceSVG(p){
+ let s="";
+ if(p.shape==="triangle")s=`<polygon points="50,7 94,88 6,88" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ if(p.shape==="circle")s=`<circle cx="50" cy="50" r="42" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ if(p.shape==="square")s=`<rect x="9" y="9" width="82" height="82" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ if(p.shape==="rect")s=`<rect x="8" y="27" width="84" height="48" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ if(p.shape==="door")s=`<path d="M20 90 V42 Q20 8 50 8 Q80 8 80 42 V90 Z" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ if(p.shape==="trapezoid")s=`<polygon points="18,18 82,18 96,86 4,86" fill="${p.color}" stroke="#34465c" stroke-width="5"/>`;
+ return `<svg viewBox="0 0 100 100" aria-hidden="true">${s}</svg>`;
+}
+function render(){
+ let r=rounds[index];filled=new Set();
+ $("count").textContent=`النشاط ${index+1} من ${rounds.length}`;
+ $("bar").style.width=(index/rounds.length*100)+"%";
+ $("instruction").textContent=r.prompt;
+ $("scene").innerHTML=r.scene;
+ $("tray").innerHTML="";
+ r.pieces.forEach(p=>{
+  let b=document.createElement("div");b.className="piece";b.dataset.id=p.id;b.innerHTML=pieceSVG(p);
+  b.addEventListener("pointerdown",startDrag);$("tray").appendChild(b);
+ });
+ $("feedback").textContent="";$("next").disabled=true;
+}
+function startDrag(e){
+ if(e.button!==undefined&&e.button!==0)return;
+ let el=e.currentTarget;if(el.classList.contains("used"))return;
+ e.preventDefault();
+ let p=rounds[index].pieces.find(x=>x.id===el.dataset.id);
+ drag={el,p};el.classList.add("dragging");
+ ghost=document.createElement("div");ghost.className="ghost";ghost.innerHTML=pieceSVG(p);document.body.appendChild(ghost);
+ moveGhost(e.clientX,e.clientY);el.setPointerCapture(e.pointerId);
+ el.addEventListener("pointermove",moveDrag);
+ el.addEventListener("pointerup",endDrag,{once:true});
+ el.addEventListener("pointercancel",cancelDrag,{once:true});
+}
+function moveGhost(x,y){if(ghost){ghost.style.left=x+"px";ghost.style.top=y+"px"}}
+function moveDrag(e){if(drag)moveGhost(e.clientX,e.clientY)}
+function endDrag(e){
+ if(!drag)return;
+ drag.el.removeEventListener("pointermove",moveDrag);
+ let hit=document.elementFromPoint(e.clientX,e.clientY);
+ let slot=hit&&hit.closest("[data-slot]");
+ if(slot&&!filled.has(slot.dataset.slot)&&drag.p.fit===slot.dataset.slot){
+  const piece=drag.p, id=slot.dataset.slot;
+  slot.setAttribute("class","");
+  slot.setAttribute("fill",piece.color);
+  slot.setAttribute("stroke","#34465c");
+  slot.setAttribute("stroke-width","6");
+  if(slot.tagName.toLowerCase()==="circle"){
+    slot.setAttribute("stroke-width","6");
+  }
+  drag.el.classList.add("used");filled.add(id);
+  $("feedback").textContent="ممتاز";$("feedback").style.color="#24855f";speak("ممتاز");
+  const required=[...document.querySelectorAll("[data-slot]")].length;
+  if(filled.size===required)$("next").disabled=false;
+ }else if(slot){
+  $("feedback").textContent="حاول مرة أخرى";$("feedback").style.color="#b47722";speak("حاول مرة أخرى");
+ }
+ cleanup();
+}
+function cancelDrag(){if(drag){drag.el.removeEventListener("pointermove",moveDrag);cleanup()}}
+function cleanup(){if(drag)drag.el.classList.remove("dragging");if(ghost)ghost.remove();ghost=null;drag=null}
+$("next").onclick=()=>{
+ index++;
+ if(index<rounds.length)render();
+ else{$("game").style.display="none";$("finish").style.display="block";$("bar").style.width="100%";speak("ممتاز")}
+};
+$("listen").onclick=()=>speak(rounds[index].prompt);
+$("again").onclick=()=>{index=0;$("finish").style.display="none";$("game").style.display="block";render()};
+render();
+</script>
+</body>
+</html>

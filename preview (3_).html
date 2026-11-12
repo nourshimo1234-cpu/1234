@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>اكتشف السبب والنتيجة</title>
+<style>
+body{font-family:Tahoma;background:#f3edff;text-align:center;padding:15px;color:#51416e}
+.box{max-width:700px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#8660c7}
+.card{padding:18px;margin:15px 0;border-radius:18px;background:#eee6ff;font-size:23px;line-height:1.7}
+.options{display:grid;gap:12px}
+button{font-family:Tahoma;font-size:20px;padding:15px;border:0;border-radius:16px;background:#e4d8ff;cursor:pointer}
+button:hover{background:#cdb9ff}
+.feedback{font-size:22px;min-height:70px;color:#21844c;line-height:1.7}
+.control{background:#c9eddb}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🔗 اكتشف السبب والنتيجة</h1>
+<p style="font-size:20px">كل حدث له سبب ونتيجة.. هيا نكتشف العلاقة!</p>
+<div class="card" id="cause"></div>
+<div style="font-size:24px;margin:15px">⬇️ ماذا كانت النتيجة؟</div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback">اختر النتيجة المناسبة 🌟</div>
+<button class="control" onclick="speak()">🔊 استمع</button>
+<button class="control" onclick="next()">الموقف التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+<script>
+const data=[
+{cause:"🌧️ هطلت الأمطار بغزارة.",a:["ابتلت الأرض","أضاءت النجوم","جفت النباتات"],c:0,ex:"المطر يجعل الأرض مبتلة."},
+{cause:"🧒 لم يأكل الطفل وجبته.",a:["شعر بالجوع","أصبح أطول فورًا","تحول إلى طائر"],c:0,ex:"عدم تناول الطعام قد يجعلنا نشعر بالجوع."},
+{cause:"☀️ أشرقت الشمس وارتفعت الحرارة.",a:["ذابت قطعة الثلج","تجمد الماء","سقط الثلج من السماء"],c:0,ex:"حرارة الشمس تجعل الثلج يذوب."},
+{cause:"🧒🧼 غسل الطفل يديه بالصابون.",a:["أصبحت يداه أنظف","أصبحت يداه متسختين","اختفى الطعام"],c:0,ex:"الصابون والماء يساعدان على تنظيف اليدين."},
+{cause:"🌱 سقى الطفل النبتة بانتظام.",a:["ساعدها على النمو","جعلها تطير","حولها إلى لعبة"],c:0,ex:"الماء يساعد النبتة على النمو."},
+{cause:"🧒📚 قرأ الطفل قصة كل يوم.",a:["تعلم كلمات وأفكارًا جديدة","نسي كل الكلمات","أصبحت القصة طعامًا"],c:0,ex:"القراءة تساعدنا على التعلم واكتساب كلمات جديدة."}
+];
+let i=0,score=0,done=false;
+function show(){
+ done=false;
+ document.getElementById("cause").textContent="السبب: "+data[i].cause;
+ document.getElementById("feedback").textContent="فكر: ماذا حدث بعد ذلك؟";
+ document.getElementById("options").innerHTML="";
+ let order=[0,1,2].sort(()=>Math.random()-.5);
+ order.forEach(j=>{
+ let b=document.createElement("button");
+ b.textContent=data[i].a[j];
+ b.onclick=()=>check(j);
+ document.getElementById("options").appendChild(b);
+ });
+}
+function check(n){
+ if(done)return;
+ if(n===data[i].c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="🎉 إجابة صحيحة! "+data[i].ex;
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="💛 فكر مرة أخرى: ما النتيجة المنطقية؟";
+ }
+}
+function speak(){
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(data[i].cause);
+ u.lang="ar-SA";u.rate=.85;speechSynthesis.speak(u);
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("cause").textContent="🏆 رائع! اكتشفت الأسباب والنتائج.";
+ document.getElementById("options").innerHTML="";
+ document.getElementById("feedback").textContent="أحسنت يا بطل التفكير!";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

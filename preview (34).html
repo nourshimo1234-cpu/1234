@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختر صورة الطرح</title>
+<style>
+body{font-family:Tahoma;background:#fff2f7;text-align:center;padding:15px;color:#62435b}
+.box{max-width:700px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#d65c91}
+.equation{font-size:48px;color:#287cba;font-weight:bold;margin:20px}
+.options{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+.option{background:#f5e9ff;border:3px solid #e4c9f7;border-radius:20px;padding:17px;min-width:135px;cursor:pointer;font-size:37px}
+.option:hover{background:#ffe3ed}
+.option p{font-size:20px}
+.feedback{font-size:23px;min-height:65px;color:#25844c}
+button{font-size:21px;padding:12px 22px;border:0;border-radius:15px;background:#ffd77d;cursor:pointer;margin:8px}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🧸 اختر صورة الطرح الصحيحة</h1>
+<p style="font-size:22px">انظر إلى المسألة، واختر الصورة التي توضح ما تبقى.</p>
+<div class="equation" id="equation"></div>
+<p style="font-size:21px">أي صورة تمثل العدد المتبقي؟</p>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback">فكر وعدّ الصور! 🌟</div>
+<button onclick="hint()">💡 مساعدة</button>
+<button onclick="next()">السؤال التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+<script>
+const data=[
+{a:2,b:1,e:"🐥"},
+{a:3,b:1,e:"🍓"},
+{a:3,b:2,e:"⚽"},
+{a:4,b:2,e:"🌸"},
+{a:5,b:2,e:"🐟"},
+{a:4,b:1,e:"🎈"}
+];
+let i=0,score=0,done=false;
+
+function show(){
+ done=false;
+ let q=data[i],c=q.a-q.b;
+ document.getElementById("equation").textContent=q.a+" - "+q.b+" = ؟";
+ document.getElementById("feedback").textContent="اختر الصورة التي توضح الباقي.";
+ let nums=[c,c+1,Math.max(0,c-1)];
+ nums=[...new Set(nums)];
+ while(nums.length<3)nums.push(c+2);
+ nums=nums.slice(0,3).sort(()=>Math.random()-.5);
+ document.getElementById("options").innerHTML="";
+ nums.forEach(n=>{
+ let div=document.createElement("div");
+ div.className="option";
+ div.innerHTML=q.e.repeat(n)+"<p>بقي "+n+"</p>";
+ div.onclick=()=>check(n,c);
+ document.getElementById("options").appendChild(div);
+ });
+}
+function check(n,c){
+ if(done)return;
+ if(n===c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="👏 ممتاز! اخترت الصورة الصحيحة!";
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="😊 حاول مرة أخرى، تذكر أننا نأخذ بعض الأشياء.";
+ }
+}
+function hint(){
+ let q=data[i];
+ document.getElementById("feedback").textContent=
+ "💡 ابدأ بعدّ "+q.a+"، ثم احذف "+q.b+"، وانظر إلى الباقي.";
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("equation").textContent="🏆 أنت بطل الطرح!";
+ document.getElementById("options").innerHTML="🎉 أحسنت!";
+ document.getElementById("feedback").textContent="أنهيت جميع الأسئلة بنجاح!";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>الجلسة 30: مراجعة شاملة</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --primary: #9b59b6;
+      --secondary: #f1c40f;
+      --success: #2ecc71;
+      --accent: #e74c3c;
+      --bg: #f5f0ff;
+    }
+
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; user-select: none; }
+
+    body {
+      margin: 0;
+      padding: 15px;
+      background-color: var(--bg);
+      color: #2c3e50;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    header {
+      background: white;
+      padding: 15px 25px;
+      border-radius: 20px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      text-align: center;
+      width: 100%;
+      max-width: 800px;
+      margin-bottom: 15px;
+    }
+
+    h1 { margin: 0 0 5px 0; color: var(--primary); font-size: 1.6rem; }
+    .session-subtitle { font-weight: bold; color: #7f8c8d; font-size: 0.95rem; }
+
+    .nav-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 15px;
+      width: 100%;
+      max-width: 800px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .tab-btn {
+      padding: 10px 14px;
+      border: none;
+      border-radius: 15px;
+      background: white;
+      color: #555;
+      font-size: 0.95rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      transition: all 0.2s ease;
+      flex: 1;
+      min-width: 110px;
+      text-align: center;
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(155, 89, 182, 0.4);
+    }
+
+    .activity-container {
+      display: none;
+      background: white;
+      width: 100%;
+      max-width: 800px;
+      border-radius: 25px;
+      padding: 20px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      text-align: center;
+    }
+
+    .activity-container.active { display: block; }
+    .act-title { font-size: 1.3rem; color: var(--primary); margin-bottom: 15px; font-weight: bold; }
+
+    .grid-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .card {
+      background: #fdfefe;
+      border: 3px solid #e0d0f0;
+      border-radius: 20px;
+      padding: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .card:hover, .card:active {
+      transform: scale(1.05);
+      border-color: var(--primary);
+      background: #f4ecf7;
+    }
+
+    .icon-lg { font-size: 3.5rem; display: block; }
+    .card-label { font-size: 1.1rem; font-weight: bold; margin-top: 5px; color: var(--primary); }
+
+    .btn {
+      font-size: 1.2rem;
+      font-weight: bold;
+      padding: 12px 25px;
+      border: none;
+      border-radius: 15px;
+      cursor: pointer;
+      color: white;
+      transition: 0.2s;
+      margin: 8px;
+    }
+
+    .btn-success { background: var(--success); }
+    .btn-accent { background: var(--accent); }
+
+    canvas {
+      border: 3px dashed var(--primary);
+      border-radius: 15px;
+      background: #fff;
+      cursor: crosshair;
+      touch-action: none;
+      margin-top: 10px;
+    }
+
+    .reward-box {
+      display: none;
+      margin-top: 20px;
+      padding: 20px;
+      background: #fff9c4;
+      border: 3px dashed #fbc02d;
+      border-radius: 20px;
+      font-size: 1.5rem;
+      color: #f57f17;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🎯 الجلسة الثلاثون: مراجعة شاملة</h1>
+    <div class="session-subtitle">مراجعة المفاهيم السابقة للأطفال (4-6 سنوات) ⏱️ 35 دقيقة</div>
+  </header>
+
+  <!-- أزرار الأنشطة الأربعة -->
+  <div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab(1)">1. الأشكال 📐</button>
+    <button class="tab-btn" onclick="switchTab(2)">2. الأرقام 🔢</button>
+    <button class="tab-btn" onclick="switchTab(3)">3. المفردات 📖</button>
+    <button class="tab-btn" onclick="switchTab(4)">4. التلوين والتعزيز 🎨</button>
+  </div>
+
+  <!-- نشاط 1: الأشكال -->
+  <div id="act1" class="activity-container active">
+    <div class="act-title">📐 انقر على الشكل التعرف عليه وسماع اسمه:</div>
+    <div class="grid-cards">
+      <div class="card" onclick="speak('دائرة دائرية حمراء')">
+        <span class="icon-lg">🔴</span><div class="card-label">دائرة</div>
+      </div>
+      <div class="card" onclick="speak('مربع أزرق ذو أربعة اضلاع')">
+        <span class="icon-lg">🟦</span><div class="card-label">مربع</div>
+      </div>
+      <div class="card" onclick="speak('مثلث أحمر بثلاث زوايا')">
+        <span class="icon-lg">🔺</span><div class="card-label">مثلث</div>
+      </div>
+      <div class="card" onclick="speak('نجمة صفراء لامعة')">
+        <span class="icon-lg">⭐</span><div class="card-label">نجمة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نشاط 2: الأرقام والعمليات -->
+  <div id="act2" class="activity-container">
+    <div class="act-title">🔢 كم عدد التفاحات في المجموعة؟</div>
+    <div style="font-size: 4rem; margin: 10px 0;">🍎 🍎 🍎</div>
+    <div>
+      <button class="btn btn-accent" onclick="checkMath(2)">2</button>
+      <button class="btn btn-success" onclick="checkMath(3)">3</button>
+      <button class="btn btn-accent" onclick="checkMath(4)">4</button>
+    </div>
+    <div id="mathFeedback" style="margin-top:15px; font-weight:bold; font-size:1.2rem;"></div>
+  </div>
+
+  <!-- نشاط 3: المفردات والقصص -->
+  <div id="act3" class="activity-container">
+    <div class="act-title">📖 تذكر مفردات القصة عند النقر:</div>
+    <div class="grid-cards">
+      <div class="card" onclick="speak('الشمس المشرقة في الصباح')">
+        <span class="icon-lg">☀️</span><div class="card-label">شمس</div>
+      </div>
+      <div class="card" onclick="speak('بيت دافئ وجميل')">
+        <span class="icon-lg">🏠</span><div class="card-label">بيت</div>
+      </div>
+      <div class="card" onclick="speak('عصفور مغرد يطير')">
+        <span class="icon-lg">🐦</span><div class="card-label">عصفور</div>
+      </div>
+      <div class="card" onclick="speak('شجرة خضراء عالية')">
+        <span class="icon-lg">🌳</span><div class="card-label">شجرة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نشاط 4: المهارات الفنية والتعزيز -->
+  <div id="act4" class="activity-container">
+    <div class="act-title">🎨 ارسم وشخبط في السبورة ثم احصل على التعزيز:</div>
+    <canvas id="paintCanvas" width="300" height="180"></canvas>
+    <div>
+      <button class="btn btn-accent" onclick="clearCanvas()">مسح 🗑️</button>
+      <button class="btn btn-success" onclick="showReward()">إنهاء الجلسة 🎉</button>
+    </div>
+
+    <div id="rewardBox" class="reward-box">
+      🎉 أحسنت، لقد راجعت كل ما تعلمته! 🌟✨
+    </div>
+  </div>
+
+  <script>
+    function speak(text) {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.lang = 'ar-SA';
+        msg.rate = 0.9;
+        window.speechSynthesis.speak(msg);
+      }
+    }
+
+    function switchTab(idx) {
+      document.querySelectorAll('.tab-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx - 1));
+      document.querySelectorAll('.activity-container').forEach((act, i) => act.classList.toggle('active', i === idx - 1));
+      if (idx === 1) speak('مراجعة الأشكال الهندسية');
+      if (idx === 2) speak('مراجعة الأرقام والعد');
+      if (idx === 3) speak('مراجعة المفردات والقصص');
+      if (idx === 4) speak('المهارات الفنية والتلوين');
+    }
+
+    function checkMath(num) {
+      const fb = document.getElementById('mathFeedback');
+      if (num === 3) {
+        fb.innerHTML = '<span style="color:var(--success)">إجابة صحيحة! ممتاز جداً 🌟</span>';
+        speak('إجابة صحيحة! عدد التفاحات ثلاثة');
+      } else {
+        fb.innerHTML = '<span style="color:var(--accent)">حاول مجدداً يا بطل 💪</span>';
+        speak('حاول مرة أخرى');
+      }
+    }
+
+    // سبورة الرسم
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    let painting = false;
+
+    function startPosition(e) { painting = true; draw(e); }
+    function endPosition() { painting = false; ctx.beginPath(); }
+    function draw(e) {
+      if (!painting) return;
+      const rect = canvas.getBoundingClientRect();
+      const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+      const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#9b59b6';
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+    }
+
+    canvas.addEventListener('mousedown', startPosition);
+    canvas.addEventListener('mouseup', endPosition);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('touchstart', startPosition);
+    canvas.addEventListener('touchend', endPosition);
+    canvas.addEventListener('touchmove', draw);
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+
+    function showReward() {
+      document.getElementById('rewardBox').style.display = 'block';
+      speak('أحسنت، لقد راجعت كل ما تعلمته!');
+      if (typeof confetti === 'function') {
+        confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+      }
+    }
+
+    window.onload = function() {
+      speak('مرحباً بك في جلسة المراجعة الشاملة!');
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>مرسمي الجميل</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#eaf6ff,#fff7e9);color:#26384d}
+main{max-width:1000px;margin:auto;padding:13px}
+header,.panel,.menu-card{background:#fff;border-radius:24px;padding:19px;text-align:center;box-shadow:0 7px 24px #24364b14}
+h1{font-size:clamp(28px,5vw,40px);color:#2d6fa7;margin:5px}
+.sub{font-size:18px;color:#71839a;line-height:1.7}
+.menu{display:grid;grid-template-columns:repeat(3,1fr);gap:13px;margin-top:15px}
+.menu-card{border:3px solid #dfebf5;cursor:pointer;padding:16px 10px}
+.menu-card .ico{font-size:53px}.menu-card strong{display:block;font-size:20px;color:#2d6fa7;margin:8px}
+.menu-card span{font-size:15px;line-height:1.6;color:#71839a}
+.panel{margin-top:15px;display:none}
+.panel.active{display:block}
+h2{font-size:clamp(22px,4vw,29px);margin:8px 0 15px}
+.prompt{font-size:22px;font-weight:bold;margin:13px 0}
+.progress{height:11px;background:#e8edf4;border-radius:20px;overflow:hidden;max-width:600px;margin:12px auto}
+.bar{height:100%;width:0;background:#59c49a;transition:.2s}
+.palette{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:15px auto}
+.color{width:48px;height:48px;border-radius:50%;border:4px solid #fff;box-shadow:0 0 0 2px #cdd9e4;cursor:pointer}
+.color.selected{box-shadow:0 0 0 4px #2d6fa7}
+.artboard{width:min(100%,680px);height:340px;margin:12px auto;background:#fff;border:3px solid #e0ebf5;border-radius:22px;display:flex;align-items:center;justify-content:center;overflow:hidden;touch-action:manipulation}
+.artboard svg{width:100%;height:100%;max-width:650px}
+.paintable{stroke:#34465c;stroke-width:5;stroke-linejoin:round;cursor:pointer}
+.paintable:hover{filter:brightness(.96)}
+.feedback{font-size:25px;font-weight:bold;min-height:36px;margin:9px;color:#29966b}
+button{border:0;border-radius:16px;padding:12px 22px;font-size:18px;font-weight:bold;cursor:pointer;background:#2d6fa7;color:white}
+button.gold{background:#f2bd51;color:#513b12}
+button.soft{background:#eaf2f8;color:#34516b}
+button:disabled{opacity:.4;cursor:not-allowed}
+.actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:12px}
+.small{font-size:14px;color:#8290a0;line-height:1.7}
+.canvas-wrap{width:min(100%,720px);margin:12px auto}
+#freeCanvas{width:100%;height:350px;background:#fff;border:3px solid #e0ebf5;border-radius:22px;touch-action:none;display:block}
+.brushes{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap}
+input[type=range]{width:130px}
+.back{margin-top:12px}
+@media(max-width:650px){main{padding:8px}.menu{grid-template-columns:1fr}.menu-card{display:flex;align-items:center;gap:12px;text-align:right;min-height:105px}.menu-card .ico{font-size:42px}.artboard{height:280px}.color{width:42px;height:42px}#freeCanvas{height:290px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+<div style="font-size:38px">🎨 🖌️ 🌈</div>
+<h1>مرسمي الجميل</h1>
+<div class="sub">ألوان جميلة، ورسومات ممتعة! اختر نشاطك وابدأ التلوين.</div>
+</header>
+
+<section id="home" class="menu">
+<div class="menu-card" onclick="openPanel('guided')"><div class="ico">🖍️</div><div><strong>1. اختر اللون الصحيح</strong><span>لوّن الجزء المطلوب باللون المناسب.</span></div></div>
+<div class="menu-card" onclick="openPanel('book')"><div class="ico">🌼</div><div><strong>2. لوّن الرسومات</strong><span>اختر ألوانك ولوّن أجزاء الصورة باللمس.</span></div></div>
+<div class="menu-card" onclick="openPanel('free')"><div class="ico">🖌️</div><div><strong>3. ارسم بحرية</strong><span>ارسم ولوّن من خيالك كما تحب.</span></div></div>
+</section>
+
+<section id="guided" class="panel">
+<div class="prompt" id="guidedPrompt"></div>
+<div class="progress"><div class="bar" id="guidedBar"></div></div>
+<div class="palette" id="guidedPalette"></div>
+<div class="artboard" id="guidedArt"></div>
+<div class="feedback" id="guidedFeedback" aria-live="polite"></div>
+<div class="actions"><button class="gold" id="guidedListen">🔊 استمع</button><button id="guidedNext" disabled>التالي ←</button></div>
+<div class="small">اختر اللون أولًا، ثم المس الجزء المطلوب من الرسمة.</div>
+<button class="soft back" onclick="goHome()">العودة للأنشطة</button>
+</section>
+
+<section id="book" class="panel">
+<h2>لوّن الرسمة كما تحب</h2>
+<div class="prompt">اختر لونًا، ثم المس أي جزء من الصورة لتلوينه.</div>
+<div class="palette" id="bookPalette"></div>
+<div class="artboard" id="bookArt"></div>
+<div class="feedback" id="bookFeedback" aria-live="polite"></div>
+<div class="actions"><button class="soft" id="prevPic">الصورة السابقة</button><button class="gold" id="nextPic">صورة أخرى ←</button><button class="soft" id="resetPic">إعادة التلوين</button></div>
+<div class="small">يمكنك اختيار أي لون تحبه. لا توجد إجابة واحدة صحيحة في التلوين الحر.</div>
+<button class="soft back" onclick="goHome()">العودة للأنشطة</button>
+</section>
+
+<section id="free" class="panel">
+<h2>ارسم من خيالك</h2>
+<div class="prompt">اختر لون الفرشاة وحجمها، ثم ارسم لوحتك الجميلة.</div>
+<div class="palette" id="freePalette"></div>
+<div class="brushes"><label>حجم الفرشاة <input id="brushSize" type="range" min="4" max="30" value="12"></label></div>
+<div class="canvas-wrap"><canvas id="freeCanvas"></canvas></div>
+<div class="actions"><button class="soft" id="eraser">ممحاة</button><button class="soft" id="clearCanvas">مسح اللوحة</button></div>
+<div class="feedback" id="freeFeedback" aria-live="polite"></div>
+<div class="small">عبّر عن أفكارك بالألوان والأشكال التي تحبها.</div>
+<button class="soft back" onclick="goHome()">العودة للأنشطة</button>
+</section>
+</main>
+
+<script>
+const colors=[
+ {name:"أحمر",hex:"#ef5350"},{name:"أصفر",hex:"#ffd54f"},{name:"أزرق",hex:"#42a5f5"},
+ {name:"أخضر",hex:"#66bb6a"},{name:"برتقالي",hex:"#ff9800"},{name:"بنفسجي",hex:"#ab7be8"},
+ {name:"وردي",hex:"#f48fb1"},{name:"بني",hex:"#a87952"},{name:"أسود",hex:"#374151"}
+];
+let selected="#ffd54f",guidedIndex=0,bookIndex=0,brushColor="#ef5350",drawing=false,last=null;
+const $=id=>document.getElementById(id);
+function speak(t){if(!("speechSynthesis"in window))return;speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang="ar";u.rate=.9;speechSynthesis.speak(u)}
+function openPanel(id){$("home").style.display="none";document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));$(id).classList.add("active");if(id==="guided"){guidedIndex=0;guidedKind=null;selected="#ffd54f";renderGuided();}if(id==="book")renderBook();if(id==="free")setupFree()}
+function goHome(){document.querySelectorAll(".panel").forEach(p=>p.classList.remove("active"));$("home").style.display="grid"}
+function palette(el,onSelect,initial){el.innerHTML="";colors.forEach(c=>{let b=document.createElement("button");b.className="color";b.style.background=c.hex;b.title=c.name;b.setAttribute("aria-label",c.name);if(c.hex===initial)b.classList.add("selected");b.onclick=()=>{el.querySelectorAll(".color").forEach(x=>x.classList.remove("selected"));b.classList.add("selected");onSelect(c.hex,c.name)};el.appendChild(b)})}
+function shapeSVG(kind,interactive=false){
+ const a=(extra="")=>interactive?`class="paintable" data-region="1" ${extra}`:extra;
+ const outline=`stroke="#34465c" stroke-width="5" stroke-linejoin="round"`;
+ if(kind==="sun")return `<svg viewBox="0 0 500 300">
+  <g fill="none" stroke="#34465c" stroke-width="13" stroke-linecap="round">
+   <path d="M250 25V55 M250 235V265 M130 145H160 M340 145H370 M165 60L188 83 M312 207L335 230 M335 60L312 83 M188 207L165 230"/>
+  </g>
+  <circle ${a('data-target-part="yes"')} cx="250" cy="145" r="70" fill="#fff" ${outline}/>
+ </svg>`;
+ if(kind==="flower")return `<svg viewBox="0 0 500 300">
+  <g fill="#fff" ${outline}>
+   <ellipse ${a()} cx="250" cy="72" rx="40" ry="62"/>
+   <ellipse ${a()} cx="250" cy="218" rx="40" ry="62"/>
+   <ellipse ${a()} cx="177" cy="145" rx="62" ry="40"/>
+   <ellipse ${a()} cx="323" cy="145" rx="62" ry="40"/>
+   <ellipse ${a()} cx="198" cy="93" rx="42" ry="58" transform="rotate(-45 198 93)"/>
+   <ellipse ${a()} cx="302" cy="93" rx="42" ry="58" transform="rotate(45 302 93)"/>
+   <ellipse ${a()} cx="198" cy="197" rx="42" ry="58" transform="rotate(45 198 197)"/>
+   <ellipse ${a()} cx="302" cy="197" rx="42" ry="58" transform="rotate(-45 302 197)"/>
+   <circle ${a()} cx="250" cy="145" r="48"/>
+  </g><path d="M250 192V280" fill="none" stroke="#34465c" stroke-width="13"/>
+ </svg>`;
+ if(kind==="fish")return `<svg viewBox="0 0 500 300">
+  <path ${a('data-target-part="yes"')} d="M95 150Q205 40 340 150Q205 260 95 150Z" fill="#fff" ${outline}/>
+  <path ${a()} d="M335 150L425 85V215Z" fill="#fff" ${outline}/>
+  <circle cx="155" cy="130" r="9" fill="#34465c"/>
+  <path d="M215 75Q245 150 215 225" fill="none" stroke="#34465c" stroke-width="5"/>
+ </svg>`;
+ if(kind==="house")return `<svg viewBox="0 0 500 300">
+  <rect ${a()} x="120" y="130" width="260" height="145" fill="#fff" ${outline}/>
+  <path ${a('data-target-part="yes"')} d="M90 140L250 25L410 140Z" fill="#fff" ${outline}/>
+  <rect ${a()} x="215" y="190" width="70" height="85" fill="#fff" ${outline}/>
+  <rect ${a()} x="145" y="160" width="55" height="50" fill="#fff" ${outline}/>
+  <rect ${a()} x="300" y="160" width="55" height="50" fill="#fff" ${outline}/>
+ </svg>`;
+ if(kind==="tree")return `<svg viewBox="0 0 500 300">
+  <rect ${a()} x="220" y="160" width="60" height="120" fill="#fff" ${outline}/>
+  <circle ${a('data-target-part="yes"')} cx="250" cy="100" r="75" fill="#fff" ${outline}/>
+  <circle ${a()} cx="180" cy="145" r="55" fill="#fff" ${outline}/>
+  <circle ${a()} cx="320" cy="145" r="55" fill="#fff" ${outline}/>
+ </svg>`;
+ if(kind==="rainbow")return `<svg viewBox="0 0 500 300">
+  <path ${a('data-paint-mode="stroke"')} d="M90 250A160 160 0 0 1 410 250" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="butt"/>
+  <path ${a('data-paint-mode="stroke"')} d="M125 250A125 125 0 0 1 375 250" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="butt"/>
+  <path ${a('data-paint-mode="stroke"')} d="M160 250A90 90 0 0 1 340 250" fill="none" stroke="#fff" stroke-width="28" stroke-linecap="butt"/>
+  <g fill="#fff" ${outline}><circle ${a()} cx="95" cy="250" r="35"/><circle ${a()} cx="405" cy="250" r="35"/></g>
+ </svg>`;
+}
+const guided=[
+ {text:"لوّن سقف البيت باللون الأحمر.",color:"#ef5350",kind:"house",part:"roof"},
+ {text:"لوّن جدران البيت باللون الأصفر.",color:"#ffd54f",kind:"house",part:"walls"},
+ {text:"لوّن باب البيت باللون البني.",color:"#a87952",kind:"house",part:"door"},
+ {text:"لوّن النافذة الأولى باللون الأزرق.",color:"#42a5f5",kind:"house",part:"window1"},
+ {text:"لوّن النافذة الثانية باللون الأزرق.",color:"#42a5f5",kind:"house",part:"window2"},
+ {text:"لوّن الجزء العلوي من أوراق الشجرة باللون الأخضر.",color:"#66bb6a",kind:"tree",part:"leavesTop"},
+ {text:"لوّن أوراق الشجرة على اليسار باللون الأخضر.",color:"#66bb6a",kind:"tree",part:"leavesLeft"},
+ {text:"لوّن أوراق الشجرة على اليمين باللون الأخضر.",color:"#66bb6a",kind:"tree",part:"leavesRight"},
+ {text:"لوّن جذع الشجرة باللون البني.",color:"#a87952",kind:"tree",part:"trunk"}
+];
+let guidedKind=null;
+function guidedSVG(kind){
+ const common='fill="#fff" stroke="#34465c" stroke-width="5" stroke-linejoin="round"';
+ if(kind==="house")return `<svg viewBox="0 0 500 300">
+  <rect data-part="walls" x="120" y="130" width="260" height="145" ${common}/>
+  <path data-part="roof" d="M90 140L250 25L410 140Z" ${common}/>
+  <rect data-part="door" x="215" y="190" width="70" height="85" ${common}/>
+  <rect data-part="window1" x="145" y="160" width="55" height="50" ${common}/>
+  <rect data-part="window2" x="300" y="160" width="55" height="50" ${common}/>
+ </svg>`;
+ if(kind==="tree")return `<svg viewBox="0 0 500 300">
+  <rect data-part="trunk" x="220" y="160" width="60" height="120" ${common}/>
+  <circle data-part="leavesLeft" cx="180" cy="145" r="55" ${common}/>
+  <circle data-part="leavesRight" cx="320" cy="145" r="55" ${common}/>
+  <circle data-part="leavesTop" cx="250" cy="90" r="70" ${common}/>
+ </svg>`;
+}
+function renderGuided(){
+ const q=guided[guidedIndex];
+ if(!q){
+  $("guidedPrompt").textContent="أكملت تلوين البيت والشجرة!";
+  $("guidedBar").style.width="100%";
+  $("guidedFeedback").textContent="ممتاز";
+  $("guidedNext").disabled=true;
+  speak("ممتاز");
+  return;
+ }
+ $("guidedPrompt").textContent=q.text;
+ $("guidedBar").style.width=(guidedIndex/guided.length*100)+"%";
+ $("guidedFeedback").textContent="";
+ $("guidedNext").disabled=true;
+ palette($("guidedPalette"),(hex)=>selected=hex,selected);
+ // Keep the same drawing while its remaining parts are being colored.
+ if(guidedKind!==q.kind){
+  guidedKind=q.kind;
+  $("guidedArt").innerHTML=guidedSVG(q.kind);
+  $("guidedArt").querySelectorAll("[data-part]").forEach(el=>{
+   el.style.cursor="pointer";
+   el.addEventListener("click",()=>{
+    const current=guided[guidedIndex];
+    if(!current || current.kind!==guidedKind || el.dataset.part!==current.part)return;
+    if(selected===current.color){
+     el.style.fill=current.color;
+     $("guidedFeedback").textContent="ممتاز";
+     $("guidedFeedback").style.color="#29966b";
+     $("guidedNext").disabled=false;
+     speak("ممتاز");
+    }else{
+     $("guidedFeedback").textContent="حاول مرة أخرى";
+     $("guidedFeedback").style.color="#b47722";
+     speak("حاول مرة أخرى");
+    }
+   });
+  });
+ }
+}
+$("guidedListen").onclick=()=>speak(guided[guidedIndex].text);
+$("guidedNext").onclick=()=>{guidedIndex++;if(guidedIndex>=guided.length){renderGuided()}else renderGuided()};
+
+const pictures=["flower","fish","house","tree","rainbow"];
+function renderBook(){
+ palette($("bookPalette"),(hex)=>selected=hex,selected);
+ $("bookArt").innerHTML=shapeSVG(pictures[bookIndex],true);
+ $("bookArt").querySelectorAll(".paintable").forEach(el=>el.onclick=()=>{
+  if(el.dataset.paintMode==="stroke"){el.style.stroke=selected;}
+  else{el.style.fill=selected;}
+  $("bookFeedback").textContent="ممتاز";$("bookFeedback").style.color="#29966b";
+ });
+ $("bookFeedback").textContent="";
+}
+$("nextPic").onclick=()=>{bookIndex=(bookIndex+1)%pictures.length;renderBook()};
+$("prevPic").onclick=()=>{bookIndex=(bookIndex+pictures.length-1)%pictures.length;renderBook()};
+$("resetPic").onclick=renderBook;
+
+let freeReady=false,ctx,canvas;
+function setupFree(){
+ if(freeReady)return;freeReady=true;
+ palette($("freePalette"),hex=>{brushColor=hex;ctx.strokeStyle=hex},brushColor);
+ canvas=$("freeCanvas");ctx=canvas.getContext("2d");
+ function resize(){let r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;let snap=canvas.toDataURL();canvas.width=r.width*d;canvas.height=r.height*d;ctx.setTransform(d,0,0,d,0,0);ctx.lineCap="round";ctx.lineJoin="round";ctx.strokeStyle=brushColor;ctx.lineWidth=12;let img=new Image();img.onload=()=>ctx.drawImage(img,0,0,r.width,r.height);img.src=snap}
+ resize();window.addEventListener("resize",resize);
+ function pos(e){let r=canvas.getBoundingClientRect();return{x:e.clientX-r.left,y:e.clientY-r.top}}
+ canvas.onpointerdown=e=>{drawing=true;last=pos(e);canvas.setPointerCapture(e.pointerId);ctx.beginPath();ctx.moveTo(last.x,last.y)};
+ canvas.onpointermove=e=>{if(!drawing)return;let p=pos(e);ctx.lineWidth=Number($("brushSize").value);ctx.lineTo(p.x,p.y);ctx.stroke();last=p};
+ canvas.onpointerup=canvas.onpointercancel=()=>{drawing=false;last=null};
+ $("brushSize").oninput=()=>ctx.lineWidth=Number($("brushSize").value);
+ $("clearCanvas").onclick=()=>{ctx.clearRect(0,0,canvas.width,canvas.height);$("freeFeedback").textContent=""};
+ $("eraser").onclick=()=>{ctx.strokeStyle="#ffffff";$("freeFeedback").textContent=""};
+}
+</script>
+</body>
+</html>

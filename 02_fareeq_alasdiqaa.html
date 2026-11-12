@@ -1,0 +1,49 @@
+<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>فريق الأصدقاء المتعاون</title><style>
+*{box-sizing:border-box} body{margin:0;font-family:Tahoma,Arial,sans-serif;background:linear-gradient(135deg,#e7f7ff,#fff2df);color:#26334a;direction:rtl}
+.wrap{max-width:900px;margin:auto;padding:18px}.top{background:#fff;border-radius:26px;padding:22px;text-align:center;box-shadow:0 7px 20px #29415a18}
+h1{margin:4px;color:#235a91;font-size:clamp(27px,5vw,40px)} .sub{font-size:20px;color:#63758b;margin:10px}
+.progress{height:13px;background:#e8edf4;border-radius:20px;overflow:hidden;margin:18px auto 5px;max-width:520px}.bar{height:100%;width:0;background:linear-gradient(90deg,#52c7a5,#69a9ef);transition:.3s}
+.panel{background:white;border-radius:25px;margin-top:18px;padding:22px;box-shadow:0 7px 20px #29415a12;text-align:center}
+.counter{color:#718096;font-weight:bold}.picture{font-size:76px;margin:8px}.question{font-size:clamp(21px,4vw,29px);line-height:1.6;font-weight:bold;margin:8px auto 20px}
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.choice{border:3px solid #dbe8f5;background:#f7fbff;border-radius:20px;padding:16px 9px;font-size:19px;font-weight:bold;color:#30435b;cursor:pointer;min-height:88px;transition:.15s}
+.choice:hover{transform:translateY(-3px);border-color:#70b9e9}.choice:focus{outline:4px solid #f7c85b}.choice.correct{background:#e2faed;border-color:#4cbd82}.choice.wrong{background:#fff0ed;border-color:#ed927f}
+.feedback{min-height:58px;margin:16px 0 4px;font-size:21px;font-weight:bold;color:#22845e}.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-top:12px}
+button.action{border:0;border-radius:18px;padding:13px 23px;font-size:18px;font-weight:bold;cursor:pointer;background:#347fbd;color:white}button.secondary{background:#f0b94c;color:#513c0b}button:disabled{opacity:.45;cursor:not-allowed}
+.small{font-size:15px;color:#7b8797;margin-top:15px}.hide{display:none}.stars{font-size:36px;color:#f4b82f}
+@media(max-width:620px){.choices{grid-template-columns:1fr}.choice{min-height:65px}.wrap{padding:10px}.panel{padding:16px}}
+</style></head><body><main class="wrap">
+<header class="top"><div style="font-size:42px">🌈 👫 🎈</div><h1 id="mainTitle"></h1><div class="sub" id="subtitle"></div><p id="intro" style="font-size:18px;line-height:1.7"></p><div class="progress"><div class="bar" id="bar"></div></div></header>
+<section class="panel" id="game"><div class="counter" id="counter"></div><div class="picture" id="pic"></div><div class="question" id="question"></div><div class="choices" id="choices"></div><div class="feedback" id="feedback" aria-live="polite"></div><div class="controls"><button class="action secondary" id="hint">💡 تلميح</button><button class="action secondary" id="speak">🔊 استمع</button><button class="action" id="next" disabled>التالي ←</button></div><div class="small">اختر الإجابة التي تراها جميلة وصحيحة.</div></section>
+<section class="panel hide" id="done"><div class="stars" id="stars"></div><h2 style="color:#25845f;font-size:30px">أحسنت يا بطل! 🎉</h2><p id="result" style="font-size:23px"></p><p style="font-size:19px">اللعب مع الأصدقاء يجعلنا سعداء! ❤️</p><button class="action" id="restart">🔄 نلعب مرة أخرى</button></section>
+</main><script>
+const data = {"file": "02_fareeq_alasdiqaa.html", "title": "فريق الأصدقاء المتعاون", "subtitle": "معًا نستطيع إنجاز المهمة!", "intro": "ساعد فريقك في إنجاز المهام. اختر كيف تتعاون مع أصدقائك.", "items": [["🏰", "نبني برجًا بالمكعبات. ماذا تفعل؟", ["أعطي صديقي المكعبات", "أمنعه من المشاركة", "أهدم البرج"], 0, "عمل رائع! التعاون يساعدنا على البناء."], ["🧺", "نريد جمع الألعاب بعد الانتهاء. ماذا نفعل؟", ["نتركها على الأرض", "يجمع كل صديق بعض الألعاب", "نطلب من طفل واحد فعل كل شيء"], 1, "أحسنت! عندما نتقاسم العمل ننتهي أسرع."], ["🎨", "نرسم لوحة للفريق. كيف تساعد؟", ["أختار لونًا وأرسم جزءًا", "أمزق الورقة", "آخذ الأقلام كلها"], 0, "رائع! لكل صديق دور مهم."], ["🧩", "صديقك لم يستطع تركيب قطعة. ماذا تفعل؟", ["أضحك عليه", "أساعده وأشجعه", "أتركه حزينًا"], 1, "أنت صديق متعاون! المساعدة تجعلنا فريقًا قويًا."]]};
+let index=0, score=0, locked=false;
+const $=id=>document.getElementById(id);
+function speak(t){if(!('speechSynthesis' in window))return; speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=.88;speechSynthesis.speak(u)}
+function render(){
+ locked=false; const q=data.items[index]; $('counter').textContent=`المهمة ${index+1} من ${data.items.length}`;
+ $('bar').style.width=(index/data.items.length*100)+'%';$('pic').textContent=q[0];$('question').textContent=q[1];$('feedback').textContent='';
+ $('choices').innerHTML=''; q[2].forEach((v,i)=>{let b=document.createElement('button');b.className='choice';b.textContent=v;b.onclick=()=>answer(i,b);$('choices').appendChild(b)});
+ $('next').disabled=true;$('hint').disabled=false;$('speak').disabled=false;
+}
+function answer(i,btn){
+ if(locked)return;locked=true;let q=data.items[index];let buttons=[...document.querySelectorAll('.choice')];
+ buttons.forEach((b,n)=>{b.disabled=true;if(n===q[3])b.classList.add('correct')});
+ if(i===q[3]){
+   score++;$('feedback').textContent='ممتاز';$('feedback').style.color='#22845e';
+   $('next').disabled=false;$('hint').disabled=true;
+ } else {
+   $('feedback').textContent='حاول مرة أخرى';
+   $('feedback').style.color='#b47722';btn.classList.add('wrong');
+   // Keep the question active so the child can try again; do not award a point.
+   locked=false;$('next').disabled=true;$('hint').disabled=false;
+   buttons.forEach((b,n)=>{if(n!==i)b.disabled=false;});
+ }
+ speak($('feedback').textContent);
+}
+function next(){index++;if(index<data.items.length){render();}else{finish();}}
+function finish(){$('game').classList.add('hide');$('done').classList.remove('hide');$('bar').style.width='100%';$('result').textContent=`أجبت إجابات صحيحة عن ${score} من ${data.items.length}`;$('stars').textContent='⭐'.repeat(Math.max(1,score));speak('أحسنت يا بطل! انتهت اللعبة.');}
+$('next').onclick=next;$('hint').onclick=()=>{let q=data.items[index];$('feedback').textContent='حاول مرة أخرى';$('feedback').style.color='#3978a8';speak($('feedback').textContent)};
+$('speak').onclick=()=>speak(data.items[index][1]);$('restart').onclick=()=>{index=0;score=0;$('done').classList.add('hide');$('game').classList.remove('hide');render()};
+$('mainTitle').textContent=data.title;$('subtitle').textContent=data.subtitle;$('intro').textContent=data.intro;render();
+</script></body></html>

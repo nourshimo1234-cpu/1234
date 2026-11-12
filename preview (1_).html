@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>المحقق الصغير</title>
+<style>
+body{font-family:Tahoma;background:#eaf6ff;text-align:center;padding:15px;color:#29465d}
+.box{max-width:680px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ccd}
+h1{color:#3189bb}
+.pic{font-size:85px;margin:15px}
+.question{font-size:25px;background:#e8f5ff;padding:18px;border-radius:18px;line-height:1.7}
+.options{display:grid;gap:12px;margin:20px}
+button{font-family:Tahoma;font-size:20px;padding:15px;border:0;border-radius:16px;cursor:pointer;background:#d9edff}
+button:hover{background:#b9ddf7}
+.feedback{font-size:22px;min-height:65px;color:#21844c;margin:15px}
+.control{background:#ffe5a9}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🔍 المحقق الصغير</h1>
+<p style="font-size:20px">فكر جيدًا.. لماذا يحدث ذلك؟</p>
+<div class="pic" id="pic"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback">هيا نكتشف ونفكر! 🌟</div>
+<button class="control" onclick="speak()">🔊 استمع للسؤال</button>
+<button class="control" onclick="next()">السؤال التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+<script>
+const data=[
+{pic:"☀️🌷",q:"لماذا تحتاج النبتة إلى ضوء الشمس؟",a:["لكي تنمو وتكبر 🌱","لكي تنام طوال اليوم 😴","لكي تطير 🦋"],c:0,why:"الشمس تساعد النبتة على النمو وصنع غذائها."},
+{pic:"🧒🧼",q:"لماذا نغسل أيدينا قبل الطعام؟",a:["لكي تصبح أيدينا متسخة","للتخلص من الجراثيم 🦠","لكي نغير لون أيدينا"],c:1,why:"غسل اليدين يساعدنا على التخلص من الجراثيم."},
+{pic:"🌧️☂️",q:"لماذا نستخدم المظلة عندما تمطر؟",a:["حتى لا نبتل بالماء ☔","لكي نطير في السماء","لكي نأكل الطعام"],c:0,why:"المظلة تحمينا من ماء المطر."},
+{pic:"🐦🌳",q:"لماذا تبني العصافير أعشاشًا؟",a:["لتضع فيها بيضها وتحمي صغارها","لتلعب بكرة القدم","لتسبح في الماء"],c:0,why:"العش مكان آمن للبيض وصغار العصافير."},
+{pic:"🦷🪥",q:"لماذا ننظف أسناننا؟",a:["لكي تتسخ أكثر","للحفاظ على نظافتها وصحتها","لكي تصبح طويلة جدًا"],c:1,why:"تنظيف الأسنان يحافظ عليها ويساعد على منع التسوس."},
+{pic:"🐟💧",q:"لماذا تعيش الأسماك في الماء؟",a:["لأنها تحتاج إلى الماء لتعيش","لأنها تحب الطيران","لأنها تأكل الأشجار"],c:0,why:"الأسماك كائنات تعيش في الماء وتحتاج إليه."}
+];
+let i=0,score=0,done=false;
+function show(){
+ done=false;
+ let d=data[i];
+ document.getElementById("pic").textContent=d.pic;
+ document.getElementById("question").textContent=d.q;
+ document.getElementById("feedback").textContent="فكر واختر إجابتك!";
+ document.getElementById("options").innerHTML="";
+ d.a.forEach((a,j)=>{
+ let b=document.createElement("button");
+ b.textContent=a;
+ b.onclick=()=>check(j);
+ document.getElementById("options").appendChild(b);
+ });
+}
+function check(n){
+ if(done)return;
+ if(n===data[i].c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="🌟 أحسنت! "+data[i].why;
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="💛 فكر مرة أخرى.. ما السبب الصحيح؟";
+ }
+}
+function speak(){
+ if(!window.speechSynthesis)return;
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(data[i].q);
+ u.lang="ar-SA";u.rate=.85;speechSynthesis.speak(u);
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("pic").textContent="🏆🎉";
+ document.getElementById("question").textContent="رائع يا محقق! انتهت الأسئلة.";
+ document.getElementById("options").innerHTML="";
+ document.getElementById("feedback").textContent="لقد فكرت واكتشفت أسبابًا كثيرة!";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

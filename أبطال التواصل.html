@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>أبطال التواصل</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Tahoma,Arial,sans-serif;
+ background:linear-gradient(135deg,#e7f8ff,#fff1df);
+ color:#35445c;text-align:center
+}
+header{
+ background:linear-gradient(120deg,#557ee9,#a274d9);
+ color:white;padding:25px 12px;border-radius:0 0 30px 30px
+}
+header h1{font-size:30px;margin:5px}
+header p{font-size:18px}
+main{max-width:900px;margin:20px auto;padding:12px}
+.score{
+ background:white;padding:14px;border-radius:18px;
+ margin-bottom:18px;font-size:21px;font-weight:bold
+}
+.menu{
+ display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+ gap:12px;margin-bottom:20px
+}
+.menu button{
+ background:white;color:#5269b5;border:3px solid #dce6ff;
+ border-radius:18px;padding:15px 7px;font-size:17px;
+ min-height:105px;font-weight:bold
+}
+.menu button span{display:block;font-size:34px;margin-bottom:7px}
+.menu button.active{background:#e7eaff;border-color:#6685ed}
+.card{
+ background:white;border-radius:25px;padding:24px 16px;
+ box-shadow:0 5px 18px #0001;min-height:300px
+}
+h2{color:#557de8;font-size:25px}
+.instruction{font-size:20px;line-height:1.8}
+.big{font-size:65px;margin:10px}
+.options{
+ display:flex;flex-wrap:wrap;justify-content:center;gap:12px;
+ margin:20px 0
+}
+.option{
+ border:3px solid #e3eaff;background:#f4f7ff;
+ border-radius:18px;padding:16px;min-width:135px;
+ font-size:18px;font-weight:bold;cursor:pointer
+}
+.option:hover{background:#e8efff}
+.option.selected{border-color:#36b98b;background:#e6fff3}
+button{
+ cursor:pointer;border:0;border-radius:15px;
+ padding:13px 22px;font-size:18px;font-weight:bold;margin:6px
+}
+.primary{background:#557ee9;color:white}
+.green{background:#38b98c;color:white}
+.orange{background:#ffbd55;color:#523b17}
+.purple{background:#a477d8;color:white}
+.message{
+ display:none;background:#e6fff3;color:#247c59;
+ border-radius:15px;padding:15px;font-size:19px;
+ line-height:1.7;margin:15px 0
+}
+.sentence{
+ background:#fff6dd;border:2px dashed #efbd57;
+ padding:17px;border-radius:17px;font-size:22px;
+ margin:15px 0;line-height:1.8
+}
+.hidden{display:none}
+.friend{
+ display:inline-block;background:#f1edff;
+ border-radius:18px;padding:15px;margin:8px;
+ min-width:125px;font-size:17px
+}
+.friend span{display:block;font-size:43px}
+footer{padding:20px;color:#7c8492}
+@media(max-width:500px){
+ header h1{font-size:23px}
+ .instruction{font-size:18px}
+ .option{min-width:110px}
+}
+</style>
+</head>
+<body>
+<header>
+ <h1>🌈 أبطال التواصل 🌈</h1>
+ <p>أتحدث – أستمع – أشارك – أحترم أصدقائي</p>
+</header>
+
+<main>
+<div class="score">
+ ⭐ نجومك: <span id="score">0</span> / 5
+</div>
+
+<div class="menu">
+ <button onclick="openActivity(1)" id="tab1" class="active">
+ <span>🎤</span>ميكروفون الأصدقاء
+ </button>
+ <button onclick="openActivity(2)" id="tab2">
+ <span>👂</span>من المتحدث؟
+ </button>
+ <button onclick="openActivity(3)" id="tab3">
+ <span>💬</span>أكمل الحوار
+ </button>
+ <button onclick="openActivity(4)" id="tab4">
+ <span>🙋</span>لمن الدور؟
+ </button>
+ <button onclick="openActivity(5)" id="tab5">
+ <span>🤝</span>لنقرر معًا
+ </button>
+</div>
+
+<!-- النشاط 1 -->
+<section class="card" id="a1">
+<h2>🎤 ميكروفون الأصدقاء</h2>
+<div class="big">🎤</div>
+<p class="instruction">
+ أمسك الميكروفون وأخبرنا: ما النشاط الذي تحبه؟
+</p>
+<div class="options" id="micOptions">
+ <div class="option" onclick="micChoice(this,'اللعب بالكرة')">⚽<br>اللعب بالكرة</div>
+ <div class="option" onclick="micChoice(this,'الرسم والتلوين')">🎨<br>الرسم</div>
+ <div class="option" onclick="micChoice(this,'قراءة القصص')">📚<br>القصص</div>
+ <div class="option" onclick="micChoice(this,'الزراعة')">🌱<br>الزراعة</div>
+</div>
+<div class="sentence" id="micSentence">اختر ما تحبه ثم عبّر عن رأيك بصوتك.</div>
+<button class="orange" onclick="speakMic()">🔊 استمع إلى الجملة</button>
+<button class="green" onclick="complete(1)">🎤 عبّرت عن رأيي</button>
+<div class="message" id="m1">رائع! 👏 لقد عبّرت عن رأيك بوضوح.</div>
+</section>
+
+<!-- النشاط 2 -->
+<section class="card hidden" id="a2">
+<h2>👂 من المتحدث؟</h2>
+<div class="friend">
+ <span>👦</span><b>أحمد</b>
+ <button class="purple" onclick="speak('أنا أحب زراعة الزهور في الحديقة.')">🔊 استمع</button>
+</div>
+<div class="friend">
+ <span>👧</span><b>سارة</b>
+ <button class="purple" onclick="speak('أنا أحب رسم الفراشات الملونة.')">🔊 استمع</button>
+</div>
+<p class="instruction">استمع جيدًا، ثم أجب:</p>
+<div class="sentence">ماذا يحب أحمد؟</div>
+<div class="options" id="listenOptions">
+ <div class="option" onclick="answerListen(this,false)">🎨 الرسم</div>
+ <div class="option" onclick="answerListen(this,true)">🌷 زراعة الزهور</div>
+ <div class="option" onclick="answerListen(this,false)">⚽ لعب الكرة</div>
+</div>
+<div class="message" id="m2"></div>
+<button class="green" onclick="complete(2)" id="b2" disabled>أكملت الاستماع 👂</button>
+</section>
+
+<!-- النشاط 3 -->
+<section class="card hidden" id="a3">
+<h2>💬 أكمل الحوار</h2>
+<div class="friend"><span>👧</span>مريم</div>
+<div class="sentence">مريم: أنا أحب اللعب بالمكعبات!</div>
+<div class="friend"><span>👦</span>عمر</div>
+<p class="instruction">ماذا يقول عمر ليشارك مريم الحوار؟</p>
+<div class="options" id="dialogOptions">
+ <div class="option" onclick="dialogAnswer(this,false)">🙉 لا أريد الاستماع إليك</div>
+ <div class="option" onclick="dialogAnswer(this,true)">😊 وأنا أحب اللعب معك!</div>
+ <div class="option" onclick="dialogAnswer(this,false)">😠 لن أتحدث معك</div>
+</div>
+<div class="message" id="m3"></div>
+<button class="green" onclick="complete(3)" id="b3" disabled>أكملت الحوار 💬</button>
+</section>
+
+<!-- النشاط 4 -->
+<section class="card hidden" id="a4">
+<h2>🙋 لمن الدور الآن؟</h2>
+<p class="instruction">شاهد الموقف وحدد من يتحدث الآن.</p>
+<div class="friend"><span>👧</span><b>سارة</b><p>تتحدث الآن</p></div>
+<div class="friend"><span>👦</span><b>أحمد</b><p>ينتظر دوره</p></div>
+<div class="friend"><span>👧</span><b>مريم</b><p>تستمع</p></div>
+<div class="sentence">من يجب أن يستمع الآن؟</div>
+<div class="options" id="turnOptions">
+ <div class="option" onclick="turnAnswer(this,true)">👦 أحمد</div>
+ <div class="option" onclick="turnAnswer(this,false)">🗣️ سارة</div>
+ <div class="option" onclick="turnAnswer(this,false)">👧 مريم</div>
+</div>
+<div class="message" id="m4"></div>
+<button class="green" onclick="complete(4)" id="b4" disabled>فهمت أدوار الحوار 🙋</button>
+</section>
+
+<!-- النشاط 5 -->
+<section class="card hidden" id="a5">
+<h2>🤝 لنقرر معًا!</h2>
+<p class="instruction">
+ يريد الأصدقاء اختيار نشاط يلعبونه معًا.
+ استمع إلى آرائهم:
+</p>
+<div class="friend"><span>👦</span>أحمد<p>أحب الكرة ⚽</p></div>
+<div class="friend"><span>👧</span>مريم<p>أحب الرسم 🎨</p></div>
+<div class="friend"><span>👦</span>عمر<p>أحب المكعبات 🧱</p></div>
+<div class="sentence">كيف نتخذ القرار معًا؟</div>
+<div class="options" id="teamOptions">
+ <div class="option" onclick="teamAnswer(this,false)">😠 أختار وحدي ولا أسمع أحدًا</div>
+ <div class="option" onclick="teamAnswer(this,true)">🤝 نستمع لبعضنا ونختار معًا</div>
+ <div class="option" onclick="teamAnswer(this,false)">🙉 لا أسمع آراء أصدقائي</div>
+</div>
+<div class="message" id="m5"></div>
+<button class="green" onclick="complete(5)" id="b5" disabled>شاركنا في اتخاذ القرار</button>
+</section>
+
+<section class="card hidden" id="finish">
+ <h2>🏆 أحسنت يا بطل التواصل!</h2>
+ <div class="big">🌟🏅🌟</div>
+ <p class="instruction">
+ أنت الآن تعرف كيف:<br>
+ 🎤 تعبّر عن رأيك.<br>
+ 👂 تستمع إلى الآخرين.<br>
+ 💬 تشارك في الحوار.<br>
+ 🙋 تنتظر دورك.<br>
+ 🤝 تتعاون مع أصدقائك.
+ </p>
+ <button class="primary" onclick="restart()">🔄 إعادة الأنشطة</button>
+</section>
+</main>
+
+<footer>أنشطة تفاعلية لتنمية التواصل لدى أطفال الروضة من 4 إلى 6 سنوات</footer>
+
+<script>
+let score=0;
+let mic='';
+let done=[false,false,false,false,false];
+
+function speak(t){
+ if(!('speechSynthesis' in window)){
+  alert('يمكن للمعلم قراءة العبارة للطفل.');
+  return;
+ }
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(t);
+ u.lang='ar-EG';u.rate=.85;
+ speechSynthesis.speak(u);
+}
+function openActivity(n){
+ for(let i=1;i<=5;i++){
+  document.getElementById('a'+i).classList.add('hidden');
+  document.getElementById('tab'+i).classList.remove('active');
+ }
+ document.getElementById('finish').classList.add('hidden');
+ document.getElementById('a'+n).classList.remove('hidden');
+ document.getElementById('tab'+n).classList.add('active');
+}
+function micChoice(el,v){
+ document.querySelectorAll('#micOptions .option').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');mic=v;
+ document.getElementById('micSentence').textContent='أنا أحب '+v+' لأنه يجعلني سعيدًا!';
+}
+function speakMic(){
+ if(!mic){alert('اختر نشاطك المفضل أولًا');return}
+ speak('أنا أحب '+mic+' لأنه يجعلني سعيدًا.');
+}
+function showMessage(n,t){
+ let m=document.getElementById('m'+n);
+ m.textContent=t;m.style.display='block';
+}
+function answerListen(el,correct){
+ document.querySelectorAll('#listenOptions .option').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ if(correct){
+  showMessage(2,'ممتاز! لقد استمعت جيدًا وفهمت ما قاله أحمد. 🌟');
+  document.getElementById('b2').disabled=false;
+ }else{
+  showMessage(2,'حاول مرة أخرى. استمع إلى أحمد جيدًا. ❤️');
+  document.getElementById('b2').disabled=true;
+ }
+}
+function dialogAnswer(el,correct){
+ document.querySelectorAll('#dialogOptions .option').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ if(correct){
+  showMessage(3,'أحسنت! هذه إجابة لطيفة تشارك بها صديقك الحوار. 💬');
+  document.getElementById('b3').disabled=false;
+ }else{
+  showMessage(3,'فكر مرة أخرى: كيف نرد على صديقنا بلطف؟');
+  document.getElementById('b3').disabled=true;
+ }
+}
+function turnAnswer(el,correct){
+ document.querySelectorAll('#turnOptions .option').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ if(correct){
+  showMessage(4,'صحيح! أحمد ينتظر دوره، ويستمع إلى سارة حتى تنتهي. 👏');
+  document.getElementById('b4').disabled=false;
+ }else{
+  showMessage(4,'حاول مرة أخرى. من الذي لا يتحدث في هذه اللحظة؟');
+  document.getElementById('b4').disabled=true;
+ }
+}
+function teamAnswer(el,correct){
+ document.querySelectorAll('#teamOptions .option').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ if(correct){
+  showMessage(5,'رائع! عندما نستمع إلى الجميع نستطيع أن نتعاون ونقرر معًا. 🤝');
+  document.getElementById('b5').disabled=false;
+ }else{
+  showMessage(5,'تذكر: لكل صديق رأي مهم، نستمع إلى الجميع. ❤️');
+  document.getElementById('b5').disabled=true;
+ }
+}
+function complete(n){
+ if(n===1 && !mic){alert('اختر ما تحبه أولًا.');return}
+ if(n>1 && !document.getElementById('b'+n).disabled===false)return;
+ if(!done[n-1]){
+  done[n-1]=true;score++;
+  document.getElementById('score').textContent=score;
+ }
+ if(n===5){
+  for(let i=1;i<=5;i++){
+   document.getElementById('a'+i).classList.add('hidden');
+   document.getElementById('tab'+i).classList.remove('active');
+  }
+  document.getElementById('finish').classList.remove('hidden');
+ }else{
+  openActivity(n+1);
+ }
+}
+function restart(){
+ score=0;done=[false,false,false,false,false];mic='';
+ document.getElementById('score').textContent=0;
+ document.querySelectorAll('.message').forEach(x=>x.style.display='none');
+ document.querySelectorAll('.option').forEach(x=>x.classList.remove('selected'));
+ [2,3,4,5].forEach(n=>document.getElementById('b'+n).disabled=true);
+ document.getElementById('micSentence').textContent='اختر ما تحبه ثم عبّر عن رأيك بصوتك.';
+ openActivity(1);
+}
+</script>
+</body>
+</html>

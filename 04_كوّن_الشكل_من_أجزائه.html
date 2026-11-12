@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>كوّن الشكل من أجزائه</title><style>
+*{box-sizing:border-box}
+body{margin:0;background:linear-gradient(135deg,#eaf7ff,#fff5e8);font-family:Tahoma,Arial,sans-serif;color:#26364d;direction:rtl}
+.wrap{max-width:1000px;margin:auto;padding:16px}
+.hero,.game,.finish{background:#fff;border-radius:26px;padding:22px;text-align:center;box-shadow:0 8px 24px #26364d14}
+h1{font-size:clamp(27px,5vw,42px);color:#28639d;margin:8px 0}
+.sub{font-size:21px;color:#71839a}
+.intro{font-size:19px;line-height:1.7}
+.progress{height:13px;max-width:620px;margin:18px auto 0;background:#e8edf4;border-radius:20px;overflow:hidden}
+.bar{height:100%;width:0;background:#58c49b;transition:.25s}
+.game{margin-top:18px}
+.count{color:#71839a;font-weight:bold;font-size:18px}
+.target{font-size:92px;line-height:1.2;margin:8px auto}
+.question{font-size:clamp(22px,4vw,30px);font-weight:bold;line-height:1.5;margin:10px 0 20px}
+.options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.opt{background:#f7fbff;border:3px solid #dceaf6;border-radius:20px;padding:12px 6px;min-height:150px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
+.opt:hover{border-color:#72b8e6;transform:translateY(-2px)}
+.opt:focus{outline:4px solid #f5c45d}
+.opt.good{background:#e9faef;border-color:#55bf83}
+.opt.bad{background:#fff0ed;border-color:#e99584}
+.group-svg{width:100%;max-width:100%;height:110px;display:block;margin:auto}
+.feedback{font-size:25px;font-weight:bold;min-height:42px;margin:15px 0;color:#24855f}
+.controls{display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+button.action{border:0;border-radius:18px;padding:13px 24px;font-size:19px;font-weight:bold;background:#347fbd;color:#fff;cursor:pointer}
+button.alt{background:#f2bd51;color:#533d10}
+button:disabled{opacity:.45;cursor:not-allowed}
+.hide{display:none}
+.small{font-size:15px;color:#7b8797;margin-top:14px}
+@media(max-width:680px){.options{grid-template-columns:1fr}.opt{min-height:120px}.group-svg{height:90px}.target{font-size:76px}.wrap{padding:10px}}
+</style></head>
+<body><main class="wrap">
+<header class="hero">
+<div style="font-size:40px">🔺 🟦 🔵</div>
+<h1>كوّن الشكل من أجزائه</h1>
+<div class="sub">اختر مجموعة الأشكال التي تكوّن الصورة</div>
+<p class="intro">انظر إلى الصورة، ثم اختر الأشكال الهندسية المناسبة. ستظهر الأشكال منفصلة وبينها علامة الجمع.</p>
+<div class="progress"><div class="bar" id="bar"></div></div>
+</header>
+<section class="game" id="game">
+<div class="count" id="count"></div>
+<div class="target" id="target"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback" aria-live="polite"></div>
+<div class="controls">
+<button class="action alt" id="listen">🔊 استمع للسؤال</button>
+<button class="action" id="next" disabled>التالي ←</button>
+</div>
+<div class="small">اختر مجموعة الأشكال الصحيحة. يمكنك المحاولة مرة أخرى.</div>
+</section>
+<section class="finish hide" id="finish">
+<h2 style="font-size:30px;color:#24855f">أحسنت!</h2>
+<p style="font-size:23px">نتيجتك: <strong id="score"></strong></p>
+<button class="action" id="again">🔄 العب مرة أخرى</button>
+</section>
+</main><script>
+const data=[{"emoji": "🏠", "name": "المنزل", "prompt": "ما الأشكال التي تكوّن هذا المنزل؟", "options": [{"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"5\" y=\"5\" width=\"50\" height=\"50\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "الإجابة الصحيحة"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}], "correct": 0}, {"emoji": "⛵", "name": "القارب", "prompt": "ما الأشكال التي تساعدنا في تكوين القارب؟", "options": [{"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 363 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"8,12 52,12 62,50 0,50\" fill=\"#ffbd4a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"272.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"287\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "الإجابة الصحيحة"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 177 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"5\" y=\"5\" width=\"50\" height=\"50\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"5\" y=\"5\" width=\"50\" height=\"50\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}], "correct": 1}, {"emoji": "🌳", "name": "الشجرة", "prompt": "ما الأشكال التي تكوّن هذه الشجرة؟", "options": [{"svg": "<svg class=\"group-svg\" viewBox=\"0 0 363 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"272.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"287\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "الإجابة الصحيحة"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}], "correct": 0}, {"emoji": "🚀", "name": "الصاروخ", "prompt": "ما الأشكال التي تكوّن هذا الصاروخ؟", "options": [{"svg": "<svg class=\"group-svg\" viewBox=\"0 0 363 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"272.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"287\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 270 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"8,12 52,12 62,50 0,50\" fill=\"#ffbd4a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "مجموعة أشكال"}, {"svg": "<svg class=\"group-svg\" viewBox=\"0 0 456 80\" role=\"img\" aria-label=\"مجموعة من الأشكال الهندسية\"><svg x=\"8\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#ff9f43\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"86.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"101\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><rect x=\"3\" y=\"14\" width=\"58\" height=\"34\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"179.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"194\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><circle cx=\"30\" cy=\"30\" r=\"25\" fill=\"#79d49a\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"272.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"287\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#72c7ef\" stroke=\"#26364d\" stroke-width=\"3\"/></svg><text x=\"365.5\" y=\"47\" text-anchor=\"middle\" font-size=\"25\" font-weight=\"bold\" fill=\"#53677e\">+</text><svg x=\"380\" y=\"7\" width=\"68\" height=\"66\" viewBox=\"0 0 64 60\"><polygon points=\"30,4 57,52 3,52\" fill=\"#f28e8e\" stroke=\"#26364d\" stroke-width=\"3\"/></svg></svg>", "label": "الإجابة الصحيحة"}], "correct": 2}];
+let index=0,score=0,locked=false;
+const $=id=>document.getElementById(id);
+function say(t){if(!('speechSynthesis'in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='ar-SA';u.rate=.9;speechSynthesis.speak(u)}
+function render(){
+ locked=false;const q=data[index];
+ $('count').textContent=`السؤال ${index+1} من ${data.length}`;
+ $('bar').style.width=(index/data.length*100)+'%';
+ $('target').textContent=q.emoji;
+ $('question').textContent=q.prompt;
+ $('feedback').textContent='';
+ $('next').disabled=true;
+ $('options').innerHTML='';
+ q.options.forEach((o,i)=>{
+   const b=document.createElement('button');
+   b.className='opt';
+   b.innerHTML=o.svg;
+   b.setAttribute('aria-label','مجموعة أشكال هندسية');
+   b.onclick=()=>answer(i,b);
+   $('options').appendChild(b);
+ });
+}
+function answer(i,btn){
+ if(locked)return;
+ const q=data[index];
+ const buttons=[...document.querySelectorAll('.opt')];
+ if(i===q.correct){
+   locked=true;score++;
+   buttons.forEach((b,n)=>{b.disabled=true;if(n===q.correct)b.classList.add('good')});
+   $('feedback').textContent='ممتاز';$('feedback').style.color='#24855f';
+   $('next').disabled=false;say('ممتاز');
+ }else{
+   btn.classList.add('bad');btn.disabled=true;
+   $('feedback').textContent='حاول مرة أخرى';$('feedback').style.color='#b47722';
+   say('حاول مرة أخرى');
+ }
+}
+function next(){index++;if(index<data.length)render();else finish()}
+function finish(){
+ $('game').classList.add('hide');$('finish').classList.remove('hide');
+ $('bar').style.width='100%';$('score').textContent=`${score} من ${data.length}`;say('ممتاز');
+}
+$('next').onclick=next;
+$('listen').onclick=()=>say(data[index].prompt);
+$('again').onclick=()=>{index=0;score=0;$('finish').classList.add('hide');$('game').classList.remove('hide');render()};
+render();
+</script></body></html>

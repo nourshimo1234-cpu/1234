@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ماذا يحدث لو؟</title>
+<style>
+body{font-family:Tahoma;background:#fff4e8;text-align:center;padding:15px;color:#65452f}
+.box{max-width:680px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#e18a36}
+.pic{font-size:85px;margin:20px}
+.question{font-size:24px;line-height:1.8;background:#fff0d8;padding:18px;border-radius:18px}
+.options{display:grid;gap:12px;margin:20px}
+button{font-family:Tahoma;font-size:20px;padding:15px;border:0;border-radius:16px;background:#ffe0b5;cursor:pointer}
+button:hover{background:#ffcf91}
+.feedback{font-size:22px;min-height:75px;color:#25824b;line-height:1.7}
+.control{background:#cdebdc}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>🤔 ماذا يحدث لو؟</h1>
+<p style="font-size:20px">تخيل الموقف وفكر في النتيجة!</p>
+<div class="pic" id="pic"></div>
+<div class="question" id="question"></div>
+<div class="options" id="options"></div>
+<div class="feedback" id="feedback">فكر جيدًا قبل أن تختار! 🌟</div>
+<button class="control" onclick="speak()">🔊 استمع</button>
+<button class="control" onclick="next()">الموقف التالي ➜</button>
+<p id="score">النجوم: 0 ⭐</p>
+</div>
+<script>
+const data=[
+{p:"🌱💧",q:"ماذا يحدث لو لم نسقِ النبتة بالماء؟",a:["قد تذبل وتجف 🥀","ستصبح سمكة 🐟","ستطير في السماء"],c:0,e:"النبتة تحتاج إلى الماء حتى تعيش وتنمو."},
+{p:"🧸🚗🧩",q:"ماذا يحدث لو تركنا ألعابنا على الأرض؟",a:["قد نتعثر بها ونسقط","ستصبح الألعاب طعامًا","ستختفي الشمس"],c:0,e:"ترتيب الألعاب يحافظ على سلامتنا ونظافة المكان."},
+{p:"☀️🧊",q:"ماذا يحدث لو تركنا قطعة الثلج تحت الشمس؟",a:["ستذوب وتصبح ماءً","ستصبح حجرًا","ستكبر وتصبح جبلًا"],c:0,e:"الحرارة تجعل الثلج يذوب."},
+{p:"🐦🥣",q:"ماذا يحدث لو لم يجد العصفور طعامًا؟",a:["قد يجوع ويبحث عن الطعام","سيصبح شجرة","سيتحول إلى سيارة"],c:0,e:"تحتاج الطيور إلى الطعام حتى تعيش."},
+{p:"🌧️👕",q:"ماذا يحدث لو خرجنا تحت المطر دون مظلة؟",a:["قد تبتل ملابسنا","ستصبح ملابسنا جافة دائمًا","سنطير في الهواء"],c:0,e:"ماء المطر يبلل الملابس."},
+{p:"🪥🦷",q:"ماذا قد يحدث لو لم ننظف أسناننا؟",a:["قد تتسوس أسناننا","ستصبح أسناننا زهورًا","ستختفي أسناننا فورًا"],c:0,e:"إهمال تنظيف الأسنان قد يسبب التسوس."}
+];
+let i=0,score=0,done=false;
+function show(){
+ done=false;
+ let d=data[i];
+ document.getElementById("pic").textContent=d.p;
+ document.getElementById("question").textContent=d.q;
+ document.getElementById("feedback").textContent="توقع ماذا سيحدث!";
+ document.getElementById("options").innerHTML="";
+ d.a.forEach((a,j)=>{
+ let b=document.createElement("button");
+ b.textContent=a;b.onclick=()=>check(j);
+ document.getElementById("options").appendChild(b);
+ });
+}
+function check(n){
+ if(done)return;
+ if(n===data[i].c){
+ done=true;score++;
+ document.getElementById("feedback").textContent="👏 رائع! "+data[i].e;
+ document.getElementById("score").textContent="النجوم: "+score+" ⭐";
+ }else{
+ document.getElementById("feedback").textContent="💡 حاول أن تتخيل النتيجة مرة أخرى.";
+ }
+}
+function speak(){
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(data[i].q);
+ u.lang="ar-SA";u.rate=.85;speechSynthesis.speak(u);
+}
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("pic").textContent="🏆🌟";
+ document.getElementById("question").textContent="انتهت مغامرة ماذا يحدث لو؟";
+ document.getElementById("options").innerHTML="";
+ document.getElementById("feedback").textContent="أحسنت! أنت تفكر وتتوقع النتائج بذكاء.";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>أنا أفكر وأعبر عن رأيي</title>
+<style>
+body{font-family:Tahoma;background:#e9f8ee;text-align:center;padding:15px;color:#315744}
+.box{max-width:700px;margin:auto;background:white;padding:22px;border-radius:25px;box-shadow:0 4px 15px #ddd}
+h1{color:#29976b}
+.pic{font-size:80px;margin:15px}
+.question{font-size:23px;background:#e6f8ec;padding:18px;border-radius:18px;line-height:1.8}
+.options{display:grid;gap:12px;margin:20px 0}
+button{font-family:Tahoma;font-size:20px;padding:15px;border:0;border-radius:16px;background:#d6f0df;cursor:pointer}
+button:hover{background:#b5e5c5}
+.reason{background:#fff0c9}
+.feedback{font-size:21px;min-height:70px;color:#21844c;line-height:1.7}
+.result{background:#fff5d9;padding:15px;border-radius:15px;font-size:21px;line-height:1.8}
+.control{background:#c9e4ff}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>💬 أنا أفكر وأعبر عن رأيي</h1>
+<p style="font-size:20px">لك رأي جميل.. أخبرنا ماذا تختار ولماذا؟</p>
+
+<div class="pic" id="pic"></div>
+<div class="question" id="question"></div>
+
+<h3>1- ماذا تختار؟</h3>
+<div class="options" id="options"></div>
+
+<h3 id="reasonTitle" style="display:none">2- لماذا اخترت ذلك؟</h3>
+<div class="options" id="reasons"></div>
+
+<div class="result" id="result" style="display:none"></div>
+<div class="feedback" id="feedback">فكر جيدًا.. لكل رأي سبب! 🌟</div>
+
+<button class="control" onclick="speak()">🔊 استمع للموقف</button>
+<button class="control" onclick="next()">الموقف التالي ➜</button>
+<p id="score">المواقف المكتملة: 0 ⭐</p>
+</div>
+
+<script>
+const data=[
+{
+pic:"🧸🧩",
+q:"وجدت ألعابك مبعثرة على الأرض، ماذا تفضل أن تفعل؟",
+choices:["أجمع ألعابي وأرتبها 🧺","أتركها مبعثرة","أرميها في كل مكان"],
+reasons:["حتى أحافظ على نظافة المكان","حتى لا أتعثر بها","لأنها ألعابي وأحب الاهتمام بها"]
+},
+{
+pic:"🧒👦",
+q:"رأيت صديقك حزينًا لأنه لا يجد من يلعب معه، ماذا تفعل؟",
+choices:["أدعوه للعب معي ❤️","أتركه وحده","أضحك عليه"],
+reasons:["لأجعله سعيدًا","لأننا أصدقاء","لأن مساعدة الآخرين تصرف جميل"]
+},
+{
+pic:"🌱💧",
+q:"رأيت نبتة أوراقها ذابلة، ماذا تقترح؟",
+choices:["أسقيها بالماء 💧","أكسر أوراقها","أتركها دون اهتمام"],
+reasons:["لأن النبات يحتاج إلى الماء","لأنني أحب النباتات","حتى أساعدها على النمو"]
+},
+{
+pic:"🍎🗑️",
+q:"انتهيت من تناول التفاحة، ماذا تفعل ببقاياها؟",
+choices:["أضعها في سلة المهملات 🗑️","أرميها على الأرض","أتركها على الطاولة"],
+reasons:["للحفاظ على نظافة المكان","لأن النظافة مهمة","حتى لا يتسخ المكان"]
+},
+{
+pic:"🌧️🧒",
+q:"الجو ممطر وأنت تريد الخروج، ماذا تختار؟",
+choices:["أرتدي معطفي وأستخدم المظلة ☔","أخرج دون استعداد","أرتدي ملابس الصيف فقط"],
+reasons:["حتى أحمي نفسي من المطر","لأنني أريد البقاء جافًا","لأن الاستعداد للطقس مهم"]
+},
+{
+pic:"📚🧒",
+q:"لديك وقت فراغ، ماذا تفضل أن تفعل؟",
+choices:["أقرأ قصة مفيدة 📖","أمزق الكتب","أترك كل شيء مبعثرًا"],
+reasons:["لأن القراءة تعلمنا أشياء جديدة","لأن القصص ممتعة","لأنني أحب اكتشاف الأشياء"]
+}
+];
+
+let i=0,selected="",reason="",score=0,done=false;
+
+function show(){
+ selected="";reason="";done=false;
+ let d=data[i];
+ document.getElementById("pic").textContent=d.pic;
+ document.getElementById("question").textContent=d.q;
+ document.getElementById("feedback").textContent="اختر ما تراه مناسبًا.";
+ document.getElementById("result").style.display="none";
+ document.getElementById("reasonTitle").style.display="none";
+ document.getElementById("reasons").innerHTML="";
+ document.getElementById("options").innerHTML="";
+ d.choices.forEach((v,j)=>{
+ let b=document.createElement("button");
+ b.textContent=v;
+ b.onclick=()=>choose(j);
+ document.getElementById("options").appendChild(b);
+ });
+}
+
+function choose(j){
+ if(done)return;
+ selected=data[i].choices[j];
+ document.getElementById("feedback").textContent="اختيار جميل! الآن أخبرنا لماذا اخترته.";
+ document.getElementById("reasonTitle").style.display="block";
+ document.getElementById("reasons").innerHTML="";
+ data[i].reasons.forEach(v=>{
+ let b=document.createElement("button");
+ b.className="reason";
+ b.textContent=v;
+ b.onclick=()=>finish(v);
+ document.getElementById("reasons").appendChild(b);
+ });
+}
+
+function finish(v){
+ if(done)return;
+ reason=v;done=true;score++;
+ document.getElementById("result").style.display="block";
+ document.getElementById("result").innerHTML=
+ "🌟 أنا أختار: <b>"+selected+"</b><br>لأن: <b>"+reason+"</b>";
+ document.getElementById("feedback").textContent=
+ "👏 رائع! لقد عبرت عن رأيك وذكرت السبب.";
+ document.getElementById("score").textContent=
+ "المواقف المكتملة: "+score+" ⭐";
+}
+
+function speak(){
+ speechSynthesis.cancel();
+ let u=new SpeechSynthesisUtterance(data[i].q);
+ u.lang="ar-SA";u.rate=.85;speechSynthesis.speak(u);
+}
+
+function next(){
+ i++;
+ if(i>=data.length){
+ document.getElementById("pic").textContent="🏆🎉";
+ document.getElementById("question").textContent="أنت طفل مفكر وصاحب رأي رائع!";
+ document.getElementById("options").innerHTML="";
+ document.getElementById("reasons").innerHTML="";
+ document.getElementById("reasonTitle").style.display="none";
+ document.getElementById("result").style.display="none";
+ document.getElementById("feedback").textContent=
+ "أحسنت! فكرت واخترت وعبرت عن رأيك.";
+ return;
+ }
+ show();
+}
+show();
+</script>
+</body>
+</html>

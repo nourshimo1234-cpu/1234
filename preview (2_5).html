@@ -1,0 +1,350 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>أصدقائي يتحدثون وأنا أستمع</title>
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;font-family:Tahoma,Arial,sans-serif;
+ background:linear-gradient(135deg,#e3f6ff,#fff2dc);
+ color:#34445b;text-align:center;
+}
+header{
+ background:linear-gradient(120deg,#557de8,#9b70d9);
+ color:white;padding:24px 12px;border-radius:0 0 30px 30px;
+ box-shadow:0 4px 12px #0002;
+}
+h1{font-size:30px;margin:5px}
+header p{font-size:18px;margin:10px}
+.container{max-width:850px;margin:22px auto;padding:12px}
+.progress{
+ background:white;border-radius:18px;padding:14px;
+ margin-bottom:20px;box-shadow:0 3px 10px #0001;
+}
+.bar{height:15px;background:#e7eaf3;border-radius:20px;overflow:hidden}
+.fill{height:100%;width:0;background:#43c99a;transition:.4s}
+.stars{font-size:25px;color:#f4ad24;margin:8px}
+.card{
+ background:white;border-radius:25px;padding:25px 18px;
+ box-shadow:0 5px 18px #34445b18;margin:18px 0;
+}
+h2{color:#557de8;font-size:25px}
+.instruction{font-size:19px;line-height:1.8}
+.choices{
+ display:flex;flex-wrap:wrap;justify-content:center;gap:13px;margin:20px 0;
+}
+.choice{
+ background:#f0f5ff;border:3px solid transparent;border-radius:20px;
+ padding:15px 20px;min-width:125px;cursor:pointer;
+ font-size:19px;font-weight:bold;transition:.2s;
+}
+.choice:hover{transform:translateY(-4px);background:#e3eaff}
+.choice.selected{border-color:#43bd91;background:#e4fff3}
+.emoji{display:block;font-size:48px;margin-bottom:8px}
+button{
+ border:0;border-radius:16px;padding:13px 25px;
+ font-size:19px;font-weight:bold;cursor:pointer;
+ margin:7px;transition:.2s;
+}
+button:hover{transform:scale(1.04)}
+.primary{background:#557de8;color:white}
+.green{background:#42bb91;color:white}
+.orange{background:#ffb94f;color:#503713}
+.purple{background:#a477d9;color:white}
+button:disabled{opacity:.5;cursor:not-allowed}
+.message{
+ padding:15px;background:#e9fff5;color:#217b58;
+ border-radius:15px;font-size:19px;margin:15px 0;
+ display:none;line-height:1.7;
+}
+.sentence{
+ background:#fff5d9;border:2px dashed #efb74b;
+ border-radius:18px;padding:18px;font-size:23px;
+ margin:15px 0;min-height:65px;line-height:1.7;
+}
+.friend{
+ display:inline-block;background:#f4edff;border-radius:20px;
+ padding:17px;margin:8px;min-width:135px;
+ font-size:18px;
+}
+.friend .face{font-size:45px;display:block}
+.hidden{display:none}
+.footer{font-size:15px;color:#78849a;padding:20px}
+</style>
+</head>
+<body>
+
+<header>
+ <h1>🌈 أصدقائي يتحدثون وأنا أستمع 🌈</h1>
+ <p>هيا نتحدث معًا ونستمع إلى أصدقائنا!</p>
+</header>
+
+<div class="container">
+
+ <div class="progress">
+  <div>⭐ نجومي: <span id="score">0</span> من 3</div>
+  <div class="stars" id="stars">☆☆☆</div>
+  <div class="bar"><div class="fill" id="fill"></div></div>
+ </div>
+
+ <!-- النشاط الأول -->
+ <section class="card" id="activity1">
+  <h2>🎨 النشاط الأول: أنا أعبّر عن رأيي</h2>
+  <p class="instruction">
+   ما الشيء الذي تحبه في الروضة؟<br>
+   اختر الصورة التي تحبها، ثم أخبرنا برأيك.
+  </p>
+
+  <div class="choices" id="likes">
+   <div class="choice" onclick="chooseLike(this,'اللعب')">
+    <span class="emoji">🧸</span>اللعب
+   </div>
+   <div class="choice" onclick="chooseLike(this,'الرسم')">
+    <span class="emoji">🎨</span>الرسم
+   </div>
+   <div class="choice" onclick="chooseLike(this,'القصص')">
+    <span class="emoji">📚</span>القصص
+   </div>
+   <div class="choice" onclick="chooseLike(this,'الأصدقاء')">
+    <span class="emoji">👫</span>الأصدقاء
+   </div>
+  </div>
+
+  <div class="sentence" id="mySentence">
+   اختر ما تحبه أولًا 😊
+  </div>
+  <button class="orange" onclick="speakSentence()">🔊 استمع إلى الجملة</button>
+  <button class="green" onclick="finish1()">🎤 قلت رأيي بنفسي</button>
+  <div class="message" id="msg1">
+   رائع! 👏 لقد عبّرت عن رأيك بوضوح. أنت طفل مميز!
+  </div>
+ </section>
+
+ <!-- النشاط الثاني -->
+ <section class="card hidden" id="activity2">
+  <h2>👂 النشاط الثاني: أستمع إلى صديقي</h2>
+  <p class="instruction">
+   صديقك يريد أن يخبرك بشيء يحبه.<br>
+   اضغط على زر الصوت واستمع جيدًا.
+  </p>
+
+  <div class="friend">
+   <span class="face">👦</span>
+   <b>أحمد</b>
+   <p>أنا أحب اللعب بالكرة!</p>
+   <button class="purple" onclick="speak('أنا أحب اللعب بالكرة، فهو يجعلني سعيدًا!')">
+    🔊 استمع إلى أحمد
+   </button>
+  </div>
+
+  <p class="instruction">ماذا تقول لأحمد بعد أن تستمع إليه؟</p>
+
+  <div class="choices" id="listenChoices">
+   <div class="choice" onclick="chooseListen(this,false)">
+    <span class="emoji">🙉</span>لا أريد أن أسمعك
+   </div>
+   <div class="choice" onclick="chooseListen(this,true)">
+    <span class="emoji">😊</span>رائع يا أحمد، أحب أن أسمعك!
+   </div>
+   <div class="choice" onclick="chooseListen(this,false)">
+    <span class="emoji">🗣️</span>سأتحدث دون أن أسمعك
+   </div>
+  </div>
+
+  <div class="message" id="msg2"></div>
+  <button class="green" id="finish2" onclick="finish2()" disabled>
+   أكملت الاستماع لصديقي
+  </button>
+ </section>
+
+ <!-- النشاط الثالث -->
+ <section class="card hidden" id="activity3">
+  <h2>👫 النشاط الثالث: دوري في الحوار الجماعي</h2>
+  <p class="instruction">
+   نحن أصدقاء نجلس معًا ونتحدث.<br>
+   لكل صديق دور في الحوار. اضغط على كل صديق لتسمع رأيه.
+  </p>
+
+  <div class="friend">
+   <span class="face">👧</span>
+   <b>سارة</b>
+   <p>أنا أحب الرسم بالألوان.</p>
+   <button class="purple" onclick="friendTalk(0)">🔊 اسمعي سارة</button>
+  </div>
+
+  <div class="friend">
+   <span class="face">👦</span>
+   <b>عمر</b>
+   <p>أنا أحب اللعب مع أصدقائي.</p>
+   <button class="purple" onclick="friendTalk(1)">🔊 اسمع عمر</button>
+  </div>
+
+  <div class="friend">
+   <span class="face">👧</span>
+   <b>مريم</b>
+   <p>أنا أحب قراءة القصص.</p>
+   <button class="purple" onclick="friendTalk(2)">🔊 اسمعي مريم</button>
+  </div>
+
+  <div class="sentence" id="turnText">
+   والآن حان دورك! ماذا تحب أن تفعل؟
+  </div>
+
+  <p class="instruction">اختر الجملة التي تعبّر عن مشاركتك في الحوار:</p>
+  <div class="choices" id="turnChoices">
+   <div class="choice" onclick="chooseTurn(this,'أنا أحب اللعب مع أصدقائي.')">
+    <span class="emoji">⚽</span>أحب اللعب
+   </div>
+   <div class="choice" onclick="chooseTurn(this,'أنا أحب الرسم والتلوين.')">
+    <span class="emoji">🖍️</span>أحب الرسم
+   </div>
+   <div class="choice" onclick="chooseTurn(this,'أنا أحب قراءة القصص.')">
+    <span class="emoji">📖</span>أحب القصص
+   </div>
+  </div>
+
+  <button class="orange" onclick="speakTurn()">🔊 استمع إلى رأيي</button>
+  <button class="green" onclick="finish3()">🎤 عبّرت عن رأيي وانتظرت دوري</button>
+  <div class="message" id="msg3">
+   أحسنت! 👏 شاركت في الحوار واستمعت إلى أصدقائك.
+  </div>
+ </section>
+
+ <section class="card hidden" id="final">
+  <h2>🏆 بطل الحوار والاستماع!</h2>
+  <div style="font-size:75px">🌟🏅🌟</div>
+  <p class="instruction">
+   أحسنت يا بطل! لقد تعلمت أن:<br>
+   💬 أعبّر عن رأيي.<br>
+   👂 أستمع إلى أصدقائي.<br>
+   👫 أشارك في الحوار وأنتظر دوري.
+  </p>
+  <div class="stars">⭐⭐⭐</div>
+  <button class="primary" onclick="restart()">🔄 العب مرة أخرى</button>
+ </section>
+
+</div>
+
+<div class="footer">
+ إعداد نشاط تفاعلي لتنمية مهارات التواصل لدى طفل الروضة (4–6 سنوات)
+</div>
+
+<script>
+let score=0;
+let like='';
+let listenCorrect=false;
+let turn='';
+
+function speak(text){
+ if(!('speechSynthesis' in window)){
+  alert('يمكنك قراءة الجملة للطفل بصوت واضح.');
+  return;
+ }
+ speechSynthesis.cancel();
+ let utter=new SpeechSynthesisUtterance(text);
+ utter.lang='ar-EG';
+ utter.rate=.85;
+ speechSynthesis.speak(utter);
+}
+
+function chooseLike(el,value){
+ document.querySelectorAll('#likes .choice').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ like=value;
+ document.getElementById('mySentence').textContent=
+ 'أنا أحب '+like+'! 😊';
+}
+
+function speakSentence(){
+ if(!like){alert('اختر الصورة التي تحبها أولًا!');return}
+ speak('أنا أحب '+like+'!');
+}
+
+function updateScore(){
+ document.getElementById('score').textContent=score;
+ document.getElementById('stars').textContent='★'.repeat(score)+'☆'.repeat(3-score);
+ document.getElementById('fill').style.width=(score/3*100)+'%';
+}
+
+function finish1(){
+ if(!like){alert('اختر شيئًا تحبه أولًا.');return}
+ if(score<1){score=1;updateScore()}
+ document.getElementById('msg1').style.display='block';
+ setTimeout(()=>{
+  document.getElementById('activity1').classList.add('hidden');
+  document.getElementById('activity2').classList.remove('hidden');
+ },1400);
+}
+
+function chooseListen(el,correct){
+ document.querySelectorAll('#listenChoices .choice').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ listenCorrect=correct;
+ let msg=document.getElementById('msg2');
+ msg.style.display='block';
+ if(correct){
+  msg.textContent='ممتاز! الاستماع إلى صديقك والرد بلطف سلوك جميل. 🌟';
+  document.getElementById('finish2').disabled=false;
+ }else{
+  msg.textContent='حاول مرة أخرى. عندما يتحدث صديقك نستمع إليه ونرد بلطف. ❤️';
+  document.getElementById('finish2').disabled=true;
+ }
+}
+
+function finish2(){
+ if(!listenCorrect)return;
+ if(score<2){score=2;updateScore()}
+ document.getElementById('activity2').classList.add('hidden');
+ document.getElementById('activity3').classList.remove('hidden');
+}
+
+function friendTalk(n){
+ let phrases=[
+  'أنا سارة، أحب الرسم بالألوان.',
+  'أنا عمر، أحب اللعب مع أصدقائي.',
+  'أنا مريم، أحب قراءة القصص.'
+ ];
+ speak(phrases[n]);
+}
+
+function chooseTurn(el,value){
+ document.querySelectorAll('#turnChoices .choice').forEach(x=>x.classList.remove('selected'));
+ el.classList.add('selected');
+ turn=value;
+ document.getElementById('turnText').textContent=turn;
+}
+
+function speakTurn(){
+ if(!turn){alert('اختر رأيك أولًا.');return}
+ speak(turn);
+}
+
+function finish3(){
+ if(!turn){alert('اختر الجملة التي تعبّر عن رأيك أولًا.');return}
+ if(score<3){score=3;updateScore()}
+ document.getElementById('msg3').style.display='block';
+ setTimeout(()=>{
+  document.getElementById('activity3').classList.add('hidden');
+  document.getElementById('final').classList.remove('hidden');
+ },1400);
+}
+
+function restart(){
+ score=0;like='';listenCorrect=false;turn='';
+ updateScore();
+ document.querySelectorAll('.choice').forEach(x=>x.classList.remove('selected'));
+ document.querySelectorAll('.message').forEach(x=>x.style.display='none');
+ document.getElementById('activity1').classList.remove('hidden');
+ document.getElementById('activity2').classList.add('hidden');
+ document.getElementById('activity3').classList.add('hidden');
+ document.getElementById('final').classList.add('hidden');
+ document.getElementById('mySentence').textContent='اختر ما تحبه أولًا 😊';
+ document.getElementById('turnText').textContent='والآن حان دورك! ماذا تحب أن تفعل؟';
+ document.getElementById('finish2').disabled=true;
+}
+</script>
+</body>
+</html>
